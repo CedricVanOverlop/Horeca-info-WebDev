@@ -3,30 +3,41 @@
     <h2>Register</h2>
 
     <div class="form-group">
-      <label for="username">Username (Email)</label>
-      <input type="email" id="username" formControlName="username" class="form-control">
-      <div *ngIf="username?.invalid && (username?.dirty || username?.touched)" class="error-message">
-        <small *ngIf="username?.errors?.['required']">Username is required.</small>
-        <small *ngIf="username?.errors?.['email']">Please enter a valid email.</small>
+      <label for="nom">Nom</label>
+      <input type="text" id="nom" formControlName="nom" class="form-control">
+      <div *ngIf="nom?.invalid && (nom?.dirty || nom?.touched)" class="error-message">
+        <small *ngIf="nom?.errors?.['required']">Le nom est requis.</small>
       </div>
     </div>
 
     <div class="form-group">
-      <label for="password">Password</label>
-      <input type="password" id="password" formControlName="password" class="form-control">
-      <div *ngIf="password?.invalid && (password?.dirty || password?.touched)" class="error-message">
-        <small *ngIf="password?.errors?.['required']">Password is required.</small>
-        <small *ngIf="password?.errors?.['minlength']">Password must be at least 6 characters long.</small>
+      <label for="prenom">Prénom</label>
+      <input type="text" id="prenom" formControlName="prenom" class="form-control">
+      <div *ngIf="prenom?.invalid && (prenom?.dirty || prenom?.touched)" class="error-message">
+        <small *ngIf="prenom?.errors?.['required']">Le prénom est requis.</small>
       </div>
     </div>
 
     <div class="form-group">
-      <label for="confirmPassword">Confirm Password</label>
-      <input type="password" id="confirmPassword" formControlName="confirmPassword" class="form-control">
-      <div *ngIf="confirmPassword?.invalid && (confirmPassword?.dirty || confirmPassword?.touched)" class="error-message">
-        <small *ngIf="confirmPassword?.errors?.['required']">Confirm Password is required.</small>
-        <small *ngIf="confirmPassword?.errors?.['mismatch']">Passwords do not match.</small>
+      <label for="email">Email</label>
+      <input type="email" id="email" formControlName="email" class="form-control">
+      <div *ngIf="email?.invalid && (email?.dirty || email?.touched)" class="error-message">
+        <small *ngIf="email?.errors?.['required']">L'email est requis.</small>
+        <small *ngIf="email?.errors?.['email']">Veuillez entrer un email valide.</small>
       </div>
+    </div>
+
+    <div class="form-group">
+      <label for="motDePasse">Mot de passe</label>
+      <input type="password" id="motDePasse" formControlName="motDePasse" class="form-control">
+      <div *ngIf="motDePasse?.invalid && (motDePasse?.dirty || motDePasse?.touched)" class="error-message">
+        <small *ngIf="motDePasse?.errors?.['required']">Le mot de passe est requis.</small>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="telephone">Téléphone (optionnel)</label>
+      <input type="tel" id="telephone" formControlName="telephone" class="form-control">
     </div>
 
     <button type="submit" [disabled]="registerForm.invalid" class="btn-register">Register</button>

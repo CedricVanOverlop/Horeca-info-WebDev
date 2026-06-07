@@ -11,7 +11,7 @@ import { RegisterResponse } from './models/register-response.model';
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = `${environment.baseUrl}/api/users`;
+  private apiUrl = `${environment.baseUrl}/api/utilisateurs`;
 
   constructor(private http: HttpClient) { }
 

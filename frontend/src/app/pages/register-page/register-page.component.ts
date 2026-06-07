@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, ValidatorFn } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthStateService } from '../../services/auth-state.service';
@@ -21,35 +21,27 @@ export class RegisterPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.registerForm = this.fb.group({
-      username: ['', [Validators.required, Validators.email]],
-      password: ['', Validators.required],
-      confirmPassword: ['', Validators.required]
+      nom: ['', Validators.required],
+      prenom: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      motDePasse: ['', Validators.required],
+      telephone: ['']
     });
-    this.registerForm.setValidators([this.passwordMatchValidator as ValidatorFn]);
-  }
-
-  passwordMatchValidator(form: FormGroup) {
-    const password = form.get('password');
-    const confirmPassword = form.get('confirmPassword');
-    if (password && confirmPassword && password.value !== confirmPassword.value) {
-      confirmPassword.setErrors({ mismatch: true });
-    } else {
-      confirmPassword?.setErrors(null);
-    }
-    return null;
   }
 
   onSubmit(): void {
     if (this.registerForm.valid) {
-      const { username, password, confirmPassword } = this.registerForm.value;
-      const credentials: RegisterRequest = { username, password, confirmPassword };
+      const { nom, prenom, email, motDePasse, telephone } = this.registerForm.value;
+      const credentials: RegisterRequest = { nom, prenom, email, motDePasse, telephone: telephone || undefined };
       this.authStateService.register(credentials);
     } else {
       this.registerForm.markAllAsTouched();
     }
   }
 
-  get username() { return this.registerForm.get('username'); }
-  get password() { return this.registerForm.get('password'); }
-  get confirmPassword() { return this.registerForm.get('confirmPassword'); }
+  get nom() { return this.registerForm.get('nom'); }
+  get prenom() { return this.registerForm.get('prenom'); }
+  get email() { return this.registerForm.get('email'); }
+  get motDePasse() { return this.registerForm.get('motDePasse'); }
+  get telephone() { return this.registerForm.get('telephone'); }
 }
