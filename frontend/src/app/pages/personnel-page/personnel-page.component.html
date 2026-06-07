@@ -1,0 +1,12 @@
+<div class="personnel-container">
+  <h2>Personnel</h2>
+  <div *ngIf="loading">Chargement...</div>
+  <div *ngIf="error" class="error-message">{{ error }}</div>
+  <div *ngIf="!loading && !error">
+    <div *ngFor="let employe of employes" class="employe-card">
+      <h3>{{ employe.nom }} {{ employe.prenom }}</h3>
+      <p>Email: {{ employe.email }}</p>
+      <p>Poste: {{ employe.poste }}</p>
+    </div>
+  </div>
+</div>
