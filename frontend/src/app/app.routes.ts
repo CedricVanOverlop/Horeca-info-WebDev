@@ -14,7 +14,12 @@ export const routes: Routes = [
   { path: 'login', component: LoginPageComponent },
   { path: 'register', component: RegisterPageComponent },
   { path: 'padel', component: PadelPageComponent, canActivate: [AuthGuard] },
-  { path: 'planning', component: PlanningPageComponent, canActivate: [AuthGuard] },
+  {
+    path: 'planning',
+    component: PlanningPageComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['Employe', 'Cuisine', 'Administrateur'] }
+  },
   { path: 'fidelite', component: FidelitePageComponent, canActivate: [AuthGuard] },
   {
     path: 'personnel',
