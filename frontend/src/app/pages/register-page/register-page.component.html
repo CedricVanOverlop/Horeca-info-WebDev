@@ -40,6 +40,10 @@
       <input type="tel" id="telephone" formControlName="telephone" class="form-control">
     </div>
 
+    <div *ngIf="serverError" class="error-message server-error">
+      <small>{{ serverError }}</small>
+    </div>
+
     <button type="submit" [disabled]="registerForm.invalid" class="btn-register">Register</button>
 
     <div class="login-link">

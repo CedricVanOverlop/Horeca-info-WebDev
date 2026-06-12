@@ -15,8 +15,12 @@ export class AuthService {
 
   constructor(private http: HttpClient) { }
 
+  /**
+   * Envoie les credentials au backend et retourne le token JWT.
+   * @param credentials Email et mot de passe de l'utilisateur
+   */
   login(credentials: AuthenticationRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/auth`, credentials);
+    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials);
   }
 
   register(userInfo: RegisterRequest): Observable<RegisterResponse> {

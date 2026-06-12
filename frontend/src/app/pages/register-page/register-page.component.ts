@@ -13,6 +13,7 @@ import { RegisterRequest } from '../../services/api/models/register-request.mode
 })
 export class RegisterPageComponent implements OnInit {
   registerForm!: FormGroup;
+  serverError: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -30,10 +31,17 @@ export class RegisterPageComponent implements OnInit {
   }
 
   onSubmit(): void {
+    this.serverError = null;
     if (this.registerForm.valid) {
       const { nom, prenom, email, motDePasse, telephone } = this.registerForm.value;
       const credentials: RegisterRequest = { nom, prenom, email, motDePasse, telephone: telephone || undefined };
-      this.authStateService.register(credentials);
+      this.authStateService.register(credentials).subscribe({
+        error: err => {
+          this.serverError = err?.status === 409
+            ? 'Cet email est déjà utilisé.'
+            : 'Une erreur est survenue. Veuillez réessayer.';
+        }
+      });
     } else {
       this.registerForm.markAllAsTouched();
     }

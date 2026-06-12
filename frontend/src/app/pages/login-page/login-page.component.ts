@@ -13,6 +13,7 @@ import { RouterLink } from '@angular/router';
 })
 export class LoginPageComponent implements OnInit {
   loginForm!: FormGroup;
+  serverError: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -21,20 +22,27 @@ export class LoginPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.loginForm = this.fb.group({
-      username: ['', [Validators.required, Validators.email]],
-      password: ['', Validators.required]
+      email: ['', [Validators.required, Validators.email]],
+      motDePasse: ['', Validators.required]
     });
   }
 
   onSubmit(): void {
+    this.serverError = null;
     if (this.loginForm.valid) {
       const credentials: AuthenticationRequest = this.loginForm.value;
-      this.authStateService.login(credentials);
+      this.authStateService.login(credentials).subscribe({
+        error: err => {
+          this.serverError = err?.status === 401
+            ? 'Email ou mot de passe incorrect.'
+            : 'Une erreur est survenue. Veuillez réessayer.';
+        }
+      });
     } else {
       this.loginForm.markAllAsTouched();
     }
   }
 
-  get username() { return this.loginForm.get('username'); }
-  get password() { return this.loginForm.get('password'); }
+  get email() { return this.loginForm.get('email'); }
+  get motDePasse() { return this.loginForm.get('motDePasse'); }
 }

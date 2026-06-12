@@ -18,7 +18,18 @@ public class UserGateway(IUserRepository userRepository, IEmployeRepository empl
     {
         var userDb = await userRepository.FindByEmail(email);
         if (userDb is null) return null;
-        if (!BCrypt.Net.BCrypt.Verify(motDePasse, userDb.MotDePasse)) return null;
+
+        bool passwordValid;
+        try
+        {
+            passwordValid = BCrypt.Net.BCrypt.Verify(motDePasse, userDb.MotDePasse);
+        }
+        catch (BCrypt.Net.SaltParseException)
+        {
+            // Hash stocké invalide (mot de passe non hashé en base) : credentials invalides.
+            return null;
+        }
+        if (!passwordValid) return null;
 
         var employeDb = await employeRepository.FindByIdUtilisateur(userDb.Id);
         if (employeDb is not null && !employeDb.Actif) return null;
