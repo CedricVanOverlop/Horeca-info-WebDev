@@ -65,9 +65,7 @@ app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapUserRoutes();
 app.MapUtilisateurRoutes();
-app.MapAuthRoutes();
 app.MapFideliteRoutes();
 app.MapOdooRoutes();
 app.MapPadelRoutes();
