@@ -5,7 +5,7 @@ namespace Infrastructure.Repositories.Abstractions;
 
 public interface IUserRepository
 {
-    Task<UserDb?> FindByEmailAndPassword(string email, string hashedPassword);
+    Task<UserDb?> FindByEmail(string email);
     Task<int> Create(RegisterRequest request, string hashedPassword);
     Task<IEnumerable<UserDb>> GetAll();
 }

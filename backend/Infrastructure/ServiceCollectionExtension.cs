@@ -13,7 +13,10 @@ public static class ServiceCollectionExtension
 {
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION")
+            ?? configuration.GetConnectionString("DefaultConnection")
+            ?? throw new InvalidOperationException("Variable d'environnement DB_CONNECTION manquante.");
+
         services.AddScoped<IDbConnection>(_ => new MySqlConnection(connectionString));
 
         services.AddScoped<IUserRepository, UserRepository>();

@@ -8,23 +8,31 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var jwt = builder.Configuration.GetSection("Jwt");
+var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY")
+    ?? builder.Configuration["Jwt:Key"]
+    ?? throw new InvalidOperationException("Variable d'environnement JWT_KEY manquante.");
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
+            ValidateIssuer           = true,
+            ValidateAudience         = true,
+            ValidateLifetime         = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = jwt["Issuer"],
-            ValidAudience = jwt["Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt["Key"]!))
+            ValidIssuer              = builder.Configuration["Jwt:Issuer"],
+            ValidAudience            = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey         = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly",      p => p.RequireRole("Administrateur"));
+    options.AddPolicy("PersonnelOnly",  p => p.RequireRole("Employe", "Cuisine", "Administrateur"));
+    options.AddPolicy("CuisineOrAdmin", p => p.RequireRole("Cuisine", "Administrateur"));
+});
 
 builder.Services.AddCors(options =>
 {

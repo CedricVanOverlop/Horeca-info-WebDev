@@ -1,3 +1,4 @@
+using Core.Exceptions;
 using System.Net;
 using System.Text.Json;
 
@@ -11,12 +12,24 @@ public class GlobalExceptionHandlerMiddleware(RequestDelegate next)
         {
             await next(context);
         }
+        catch (ValidationException ex)
+        {
+            await WriteResponse(context, HttpStatusCode.BadRequest, ex.Message);
+        }
+        catch (ConflictException ex)
+        {
+            await WriteResponse(context, HttpStatusCode.Conflict, ex.Message);
+        }
         catch (Exception ex)
         {
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            context.Response.ContentType = "application/json";
-            var error = new { message = ex.Message };
-            await context.Response.WriteAsync(JsonSerializer.Serialize(error));
+            await WriteResponse(context, HttpStatusCode.InternalServerError, ex.Message);
         }
+    }
+
+    private static async Task WriteResponse(HttpContext context, HttpStatusCode statusCode, string message)
+    {
+        context.Response.StatusCode = (int)statusCode;
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsync(JsonSerializer.Serialize(new { message }));
     }
 }
