@@ -12,9 +12,9 @@
     </div>
 
     <ul class="side-menu-links">
-      @for (link of visibleLinks; track link.label) {
+      @for (link of visibleLinks; track link.path) {
         <li class="link">
-          <a class="link-label" [routerLink]="link.route" (click)="close()">{{ link.label }}</a>
+          <a class="link-label" [routerLink]="'/' + link.path" (click)="close()">{{ link.label }}</a>
         </li>
       }
     </ul>

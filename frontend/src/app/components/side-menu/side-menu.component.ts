@@ -3,13 +3,8 @@ import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthStateService } from '../../services/auth-state.service';
 import { MenuStateService } from '../../services/menu-state.service';
-
-/** Lien du menu : libellé, route cible et rôles autorisés à le voir. */
-interface MenuLink {
-  label: string;
-  route: string;
-  roles: string[];
-}
+import { NAV, NavItem } from '../../nav.config';
+import { Role } from '../../roles';
 
 /**
  * Panneau latéral piloté par le MenuStateService.
@@ -25,20 +20,6 @@ interface MenuLink {
 export class SideMenuComponent implements OnInit, OnDestroy {
   /** Vrai si le panneau est ouvert. */
   isOpen = false;
-
-  /** Liste complète des liens, badges et niveaux d'accès. */
-  private readonly allLinks: MenuLink[] = [
-    { label: 'Mon compte', route: '/mon-compte', roles: ['Client', 'Employe', 'Cuisine', 'Administrateur'] },
-    { label: 'Mes points de fidélité', route: '/fidelite', roles: ['Client', 'Employe', 'Administrateur'] },
-    { label: 'Réserver un terrain', route: '/padel', roles: ['Client', 'Employe', 'Cuisine', 'Administrateur'] },
-    { label: 'Mes disponibilités', route: '/disponibilites', roles: ['Employe', 'Administrateur'] },
-    { label: 'Mon horaire', route: '/mon-horaire', roles: ['Employe', 'Administrateur'] },
-    { label: 'Gestion Cuisine', route: '/cuisine', roles: ['Cuisine', 'Administrateur'] },
-    { label: 'Gestion Terrains', route: '/terrains', roles: ['Cuisine', 'Administrateur'] },
-    { label: 'Gestion Stocks', route: '/stocks', roles: ['Cuisine', 'Administrateur'] },
-    { label: 'Créer des horaires', route: '/horaires', roles: ['Administrateur'] },
-    { label: 'Gestion des utilisateurs', route: '/utilisateurs', roles: ['Administrateur'] }
-  ];
 
   private subscription?: Subscription;
 
@@ -70,10 +51,10 @@ export class SideMenuComponent implements OnInit, OnDestroy {
     return `${this.authState.currentUserNom ?? ''} ${this.authState.currentUserPrenom ?? ''}`.trim();
   }
 
-  /** Liens visibles selon le rôle courant. */
-  get visibleLinks(): MenuLink[] {
-    const role = this.authState.currentUserRole ?? 'Client';
-    return this.allLinks.filter(link => link.roles.includes(role));
+  /** Liens de la sidebar visibles selon le rôle courant (dérivés de NAV). */
+  get visibleLinks(): NavItem[] {
+    const role = (this.authState.currentUserRole ?? 'Client') as Role;
+    return NAV.filter(item => item.sidebar && (item.roles?.includes(role) ?? false));
   }
 
   /**
