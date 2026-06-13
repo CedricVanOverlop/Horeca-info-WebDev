@@ -1,5 +1,4 @@
+/* Conteneur pleine largeur — chaque carte commerce occupe toute la page */
 .home-container {
-  max-width: 640px;
-  margin: 0 auto;
-  padding: 1.5rem 1.25rem;
+  width: 100%;
 }

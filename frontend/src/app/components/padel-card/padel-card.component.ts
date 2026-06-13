@@ -2,8 +2,9 @@ import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 /**
- * Contenu de l'onglet Padel Lobbes sur la home page.
- * Présentation statique, sans appel HTTP. Bouton non fonctionnel pour l'instant.
+ * Carte de présentation du Padel Center Lobbes.
+ * Affichée sur la page d'accueil lorsque l'onglet "Padel Lobbes" est actif.
+ * Le bouton "Réserver un terrain" navigue vers la route interne /reservations.
  */
 @Component({
   selector: 'app-padel-card',

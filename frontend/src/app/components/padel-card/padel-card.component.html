@@ -1,16 +1,78 @@
-<section class="card">
-  <h1 class="card-title">Bienvenue chez Padel Lobbes</h1>
-  <p class="card-subtitle">Réservez votre terrain de padel en quelques clics.</p>
-  <p class="card-text">
-    Choisissez votre créneau, invitez vos partenaires et profitez du jeu. La réservation est rapide
-    et sans engagement.
-  </p>
+<!-- Page de présentation plein écran du Padel Center Lobbes -->
+<section class="commerce">
 
-  <div class="card-image" aria-hidden="true">
-    <span class="placeholder-icon">◯</span>
-  </div>
+  <header class="hero">
+    <img class="hero-img" src="padel.png" alt="Padel Center Lobbes" />
+    <div class="hero-overlay">
+      <span class="badge">🎾 Ouverture 2027</span>
+      <h1 class="hero-title">Padel Center Lobbes</h1>
+      <p class="hero-tagline">
+        Le sport qui fait fureur arrive à Lobbes. Terrains modernes, réservation en ligne,
+        et des parties à partager entre amis ou en famille.
+      </p>
+      <a routerLink="/padel" class="btn btn-lg">
+        Réserver un terrain
+      </a>
+    </div>
+  </header>
 
-  <div class="card-actions">
-    <a routerLink="#" class="btn btn-outline">Réserver un terrain</a>
+  <div class="content">
+
+    <section class="pitch">
+      <h2>Jouez quand vous voulez, comme vous voulez</h2>
+      <p>
+        Le padel, c'est le mélange parfait entre tennis et convivialité : facile à prendre
+        en main, intense à jouer, et toujours plus fun à plusieurs. Notre centre vous propose
+        des terrains couverts et extérieurs de qualité, accessibles tous les jours de 8h à 22h,
+        pour que vous puissiez jouer quelle que soit la météo ou votre emploi du temps.
+      </p>
+      <p>
+        Réservez votre créneau directement depuis cette application en quelques secondes :
+        choisissez le terrain, l'horaire, et le tarif se calcule automatiquement selon le
+        moment de la journée. Pas d'appel, pas d'attente — votre partie est confirmée en un clic.
+        Que vous soyez débutant curieux ou joueur aguerri, le Padel Center Lobbes vous attend.
+      </p>
+    </section>
+
+    <section class="features">
+      <article class="feature">
+        <span class="feature-icon" aria-hidden="true">🏟️</span>
+        <h3>Terrains couverts &amp; extérieurs</h3>
+        <p>Jouez par tous les temps sur des surfaces modernes et bien entretenues.</p>
+      </article>
+      <article class="feature">
+        <span class="feature-icon" aria-hidden="true">🕐</span>
+        <h3>8h – 22h, tous les jours</h3>
+        <p>Des créneaux larges pour s'adapter à votre rythme de vie.</p>
+      </article>
+      <article class="feature">
+        <span class="feature-icon" aria-hidden="true">⚡</span>
+        <h3>Réservation instantanée</h3>
+        <p>Choisissez votre créneau et confirmez en ligne en quelques secondes.</p>
+      </article>
+      <article class="feature">
+        <span class="feature-icon" aria-hidden="true">💶</span>
+        <h3>Tarif transparent</h3>
+        <p>Le prix s'affiche automatiquement selon l'horaire choisi, sans surprise.</p>
+      </article>
+    </section>
+
+    <section class="infos">
+      <h2>Infos pratiques</h2>
+      <ul class="infos-list">
+        <li><span class="meta-icon" aria-hidden="true">📍</span> Rue des Waibes 64, 6540 Lobbes</li>
+        <li><span class="meta-icon" aria-hidden="true">🕐</span> Tous les jours : 8h00 – 22h00</li>
+        <li><span class="meta-icon" aria-hidden="true">🏓</span> Terrains couverts &amp; extérieurs disponibles</li>
+      </ul>
+    </section>
+
+    <section class="cta-final">
+      <h2>Prêt à jouer ?</h2>
+      <p>Réservez votre terrain en quelques clics et entrez sur le court.</p>
+      <a routerLink="/padel" class="btn btn-lg">
+        Réserver maintenant
+      </a>
+    </section>
+
   </div>
 </section>

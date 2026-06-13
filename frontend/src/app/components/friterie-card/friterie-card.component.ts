@@ -1,13 +1,12 @@
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
 
 /**
- * Contenu de l'onglet Friterie.net sur la home page.
- * Présentation statique, sans appel HTTP. Boutons non fonctionnels pour l'instant.
+ * Carte de présentation du commerce Friterie.net.
+ * Affichée sur la page d'accueil lorsque l'onglet "Friterie.net" est actif.
+ * Le bouton "Commander" redirige vers le site externe friterie.net.
  */
 @Component({
   selector: 'app-friterie-card',
-  imports: [RouterLink],
   templateUrl: './friterie-card.component.html',
   styleUrl: './friterie-card.component.css'
 })
