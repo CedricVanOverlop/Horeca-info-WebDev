@@ -10,7 +10,7 @@ import { AuthGuard } from './guards/auth.guard';
 import { RoleGuard } from './guards/role.guard';
 
 export const routes: Routes = [
-  { path: '', component: HomePageComponent, canActivate: [AuthGuard] },
+  { path: '', component: HomePageComponent },
   { path: 'login', component: LoginPageComponent },
   { path: 'register', component: RegisterPageComponent },
   { path: 'padel', component: PadelPageComponent, canActivate: [AuthGuard] },
