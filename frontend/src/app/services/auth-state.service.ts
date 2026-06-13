@@ -58,6 +58,32 @@ export class AuthStateService {
   }
 
   /**
+   * Nom de famille de l'utilisateur courant extrait du claim "nom", ou null.
+   */
+  public get currentUserNom(): string | null {
+    const payload = this.decodeToken();
+    return payload?.['nom'] ?? null;
+  }
+
+  /**
+   * Prénom de l'utilisateur courant extrait du claim "prenom", ou null.
+   */
+  public get currentUserPrenom(): string | null {
+    const payload = this.decodeToken();
+    return payload?.['prenom'] ?? null;
+  }
+
+  /**
+   * Initiales de l'utilisateur (première lettre du nom + du prénom), en majuscules.
+   * Retourne une chaîne vide si aucun claim n'est disponible.
+   */
+  public get currentUserInitials(): string {
+    const nom = this.currentUserNom ?? '';
+    const prenom = this.currentUserPrenom ?? '';
+    return `${nom.charAt(0)}${prenom.charAt(0)}`.toUpperCase();
+  }
+
+  /**
    * Authentifie l'utilisateur, stocke le token et redirige vers l'accueil.
    * Retourne l'Observable pour que l'appelant gère les erreurs serveur.
    * @param credentials Email et mot de passe

@@ -1,0 +1,75 @@
+.side-menu {
+  position: fixed;
+  top: 56px;
+  right: 0;
+  bottom: 0;
+  width: 300px;
+  z-index: 90;
+  background: #ffffff;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+  transform: translateX(100%);
+  transition: transform 0.25s ease;
+  overflow-y: auto;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.side-menu.open {
+  transform: translateX(0);
+}
+
+.side-menu-message {
+  padding: 1.5rem 1.25rem;
+  color: #3d3d3d;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.side-menu-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #ececec;
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #3d3d3d;
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.profile-name {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.side-menu-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.link-label {
+  color: #1a1a1a;
+  font-size: 0.95rem;
+}
+
+.link-badge {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
