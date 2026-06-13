@@ -3,10 +3,11 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { AuthStateService } from '../../services/auth-state.service';
 import { AuthenticationRequest } from '../../services/api/models/authentication-request.model';
 import { RouterLink } from '@angular/router';
+import { NavbarComponent } from '../../components/navbar/navbar.component';
 
 @Component({
   selector: 'app-login-page',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, NavbarComponent],
   templateUrl: './login-page.component.html',
   styleUrls: ['./login-page.component.css']
 })

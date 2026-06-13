@@ -14,8 +14,7 @@
     <ul class="side-menu-links">
       @for (link of visibleLinks; track link.label) {
         <li class="link">
-          <span class="link-label">{{ link.label }}</span>
-          <span class="link-badge" [style.color]="link.color">{{ link.badge }}</span>
+          <a class="link-label" [routerLink]="link.route" (click)="close()">{{ link.label }}</a>
         </li>
       }
     </ul>

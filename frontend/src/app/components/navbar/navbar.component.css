@@ -14,6 +14,18 @@
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
+.navbar-logo {
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+}
+
+.navbar-logo img {
+  height: 40px;
+  width: auto;
+  display: block;
+}
+
 /*
  * Les onglets sont projetés par la page hôte via ng-content : leurs noeuds DOM
  * portent l'encapsulation de la page, pas celle de la navbar. On utilise donc

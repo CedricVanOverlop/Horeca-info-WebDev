@@ -1,24 +1,15 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthStateService } from '../../services/auth-state.service';
 import { MenuStateService } from '../../services/menu-state.service';
 
-/** Niveau d'accès requis pour voir un lien, avec son badge de couleur. */
+/** Lien du menu : libellé, route cible et rôles autorisés à le voir. */
 interface MenuLink {
   label: string;
-  badge: string;
-  color: string;
-  /** Rang minimal requis (Client=0, Employe=1, Cuisine=2, Administrateur=3). */
-  minRank: number;
+  route: string;
+  roles: string[];
 }
-
-/** Classement hiérarchique des rôles pour le filtrage des liens. */
-const ROLE_RANK: Record<string, number> = {
-  Client: 0,
-  Employe: 1,
-  Cuisine: 2,
-  Administrateur: 3
-};
 
 /**
  * Panneau latéral piloté par le MenuStateService.
@@ -27,7 +18,7 @@ const ROLE_RANK: Record<string, number> = {
  */
 @Component({
   selector: 'app-side-menu',
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './side-menu.component.html',
   styleUrl: './side-menu.component.css'
 })
@@ -37,17 +28,16 @@ export class SideMenuComponent implements OnInit, OnDestroy {
 
   /** Liste complète des liens, badges et niveaux d'accès. */
   private readonly allLinks: MenuLink[] = [
-    { label: 'Mon compte', badge: 'Tout le monde', color: '#0F6E56', minRank: 0 },
-    { label: 'Mes points de fidélité', badge: 'Tout le monde', color: '#0F6E56', minRank: 0 },
-    { label: 'Réserver un terrain', badge: 'Tout le monde', color: '#0F6E56', minRank: 0 },
-    { label: 'Voir mon historique', badge: 'Tout le monde', color: '#0F6E56', minRank: 0 },
-    { label: 'Mes disponibilités', badge: 'Employé +', color: '#185FA5', minRank: 1 },
-    { label: 'Mon horaire', badge: 'Employé +', color: '#185FA5', minRank: 1 },
-    { label: 'Gestion Cuisine', badge: 'Cuisine +', color: '#854F0B', minRank: 2 },
-    { label: 'Gestion Terrains', badge: 'Cuisine +', color: '#854F0B', minRank: 2 },
-    { label: 'Gestion Stocks', badge: 'Cuisine +', color: '#854F0B', minRank: 2 },
-    { label: 'Créer des horaires', badge: 'Patron', color: '#A32D2D', minRank: 3 },
-    { label: 'Gestion des utilisateurs', badge: 'Patron', color: '#A32D2D', minRank: 3 }
+    { label: 'Mon compte', route: '/mon-compte', roles: ['Client', 'Employe', 'Cuisine', 'Administrateur'] },
+    { label: 'Mes points de fidélité', route: '/fidelite', roles: ['Client', 'Employe', 'Administrateur'] },
+    { label: 'Réserver un terrain', route: '/padel', roles: ['Client', 'Employe', 'Cuisine', 'Administrateur'] },
+    { label: 'Mes disponibilités', route: '/disponibilites', roles: ['Employe', 'Administrateur'] },
+    { label: 'Mon horaire', route: '/mon-horaire', roles: ['Employe', 'Administrateur'] },
+    { label: 'Gestion Cuisine', route: '/cuisine', roles: ['Cuisine', 'Administrateur'] },
+    { label: 'Gestion Terrains', route: '/terrains', roles: ['Cuisine', 'Administrateur'] },
+    { label: 'Gestion Stocks', route: '/stocks', roles: ['Cuisine', 'Administrateur'] },
+    { label: 'Créer des horaires', route: '/horaires', roles: ['Administrateur'] },
+    { label: 'Gestion des utilisateurs', route: '/utilisateurs', roles: ['Administrateur'] }
   ];
 
   private subscription?: Subscription;
@@ -80,10 +70,10 @@ export class SideMenuComponent implements OnInit, OnDestroy {
     return `${this.authState.currentUserNom ?? ''} ${this.authState.currentUserPrenom ?? ''}`.trim();
   }
 
-  /** Liens visibles selon le rang du rôle courant. */
+  /** Liens visibles selon le rôle courant. */
   get visibleLinks(): MenuLink[] {
-    const rank = ROLE_RANK[this.authState.currentUserRole ?? 'Client'] ?? 0;
-    return this.allLinks.filter(link => rank >= link.minRank);
+    const role = this.authState.currentUserRole ?? 'Client';
+    return this.allLinks.filter(link => link.roles.includes(role));
   }
 
   /**
