@@ -9,7 +9,8 @@
   box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
   transform: translateX(100%);
   transition: transform 0.25s ease;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
@@ -54,6 +55,29 @@
   list-style: none;
   margin: 0;
   padding: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+
+.side-menu-footer {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid #ececec;
+}
+
+.btn-logout {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  border: 1px solid #1a1a1a;
+  border-radius: 8px;
+  background: transparent;
+  color: #1a1a1a;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.btn-logout:hover {
+  background: #1a1a1a;
+  color: #ffffff;
 }
 
 .link {

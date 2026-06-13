@@ -1,13 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthStateService } from '../../services/auth-state.service';
 import { RegisterRequest } from '../../services/api/models/register-request.model';
 
 @Component({
   selector: 'app-register-page',
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './register-page.component.html',
   styleUrls: ['./register-page.component.css']
 })

@@ -1,5 +1,4 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { AuthStateService } from '../../services/auth-state.service';
 import { MenuStateService } from '../../services/menu-state.service';
@@ -28,7 +27,7 @@ const ROLE_RANK: Record<string, number> = {
  */
 @Component({
   selector: 'app-side-menu',
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './side-menu.component.html',
   styleUrl: './side-menu.component.css'
 })
@@ -92,5 +91,13 @@ export class SideMenuComponent implements OnInit, OnDestroy {
    */
   close(): void {
     this.menuState.close();
+  }
+
+  /**
+   * Déconnecte l'utilisateur (purge le token, redirige vers /login) et ferme le panneau.
+   */
+  logout(): void {
+    this.menuState.close();
+    this.authState.logout();
   }
 }

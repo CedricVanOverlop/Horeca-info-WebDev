@@ -1,12 +1,20 @@
+<app-navbar></app-navbar>
+
 <div class="planning-container">
   <h2>Planning</h2>
-  <div *ngIf="loading">Chargement...</div>
-  <div *ngIf="error" class="error-message">{{ error }}</div>
-  <div *ngIf="!loading && !error">
-    <div *ngFor="let planning of plannings" class="planning-card">
-      <p>Employé: {{ planning.employeId }}</p>
-      <p>Début: {{ planning.dateDebut }}</p>
-      <p>Fin: {{ planning.dateFin }}</p>
-    </div>
-  </div>
+  @if (loading) {
+    <div>Chargement...</div>
+  }
+  @if (error) {
+    <div class="error-message">{{ error }}</div>
+  }
+  @if (!loading && !error) {
+    @for (planning of plannings; track planning.id) {
+      <div class="planning-card">
+        <p>Employé: {{ planning.employeId }}</p>
+        <p>Début: {{ planning.dateDebut }}</p>
+        <p>Fin: {{ planning.dateFin }}</p>
+      </div>
+    }
+  }
 </div>

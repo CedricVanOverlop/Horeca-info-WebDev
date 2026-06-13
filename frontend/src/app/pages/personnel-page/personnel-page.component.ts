@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { PersonnelService } from '../../services/api/personnel.service';
 import { Employe } from '../../services/api/models/employe.model';
 import { AuthStateService } from '../../services/auth-state.service';
+import { NavbarComponent } from '../../components/navbar/navbar.component';
 
 @Component({
   selector: 'app-personnel-page',
-  imports: [CommonModule],
+  imports: [NavbarComponent],
   templateUrl: './personnel-page.component.html',
   styleUrl: './personnel-page.component.css'
 })

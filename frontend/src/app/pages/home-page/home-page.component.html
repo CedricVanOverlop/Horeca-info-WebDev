@@ -1,5 +1,35 @@
+<app-navbar>
+  <div class="navbar-tabs">
+    <button
+      type="button"
+      class="tab"
+      [class.active]="activeTab === 'friterie'"
+      (click)="selectTab('friterie')">
+      Friterie.net
+    </button>
+    <button
+      type="button"
+      class="tab"
+      [class.active]="activeTab === 'glaces'"
+      (click)="selectTab('glaces')">
+      Baraque à Glaces
+    </button>
+    <button
+      type="button"
+      class="tab"
+      [class.active]="activeTab === 'padel'"
+      (click)="selectTab('padel')">
+      Padel Lobbes
+    </button>
+  </div>
+</app-navbar>
+
 <div class="home-container">
-  <app-friterie-card *ngIf="activeTab === 'friterie'"></app-friterie-card>
-  <app-glaces-card *ngIf="activeTab === 'glaces'"></app-glaces-card>
-  <app-padel-card *ngIf="activeTab === 'padel'"></app-padel-card>
+  @if (activeTab === 'friterie') {
+    <app-friterie-card></app-friterie-card>
+  } @else if (activeTab === 'glaces') {
+    <app-glaces-card></app-glaces-card>
+  } @else if (activeTab === 'padel') {
+    <app-padel-card></app-padel-card>
+  }
 </div>

@@ -1,46 +1,21 @@
 <nav class="navbar">
-  <!-- Onglets commerce : visibles uniquement sur la route '/' -->
-  <div class="navbar-tabs" *ngIf="isHome">
-    <button
-      type="button"
-      class="tab"
-      [class.active]="activeTab === 'friterie'"
-      (click)="selectTab('friterie')">
-      Friterie.net
-    </button>
-    <button
-      type="button"
-      class="tab"
-      [class.active]="activeTab === 'glaces'"
-      (click)="selectTab('glaces')">
-      Baraque à Glaces
-    </button>
-    <button
-      type="button"
-      class="tab"
-      [class.active]="activeTab === 'padel'"
-      (click)="selectTab('padel')">
-      Padel Lobbes
-    </button>
-  </div>
+  <ng-content></ng-content>
 
-  <!-- Espaceur pour pousser les actions à droite quand les onglets sont masqués -->
+  <!-- Espaceur pour pousser les actions à droite quand rien n'est projeté -->
   <span class="navbar-spacer"></span>
 
   <!-- Actions à droite -->
   <div class="navbar-actions">
-    <ng-container *ngIf="!isLoggedIn; else loggedIn">
+    @if (!isLoggedIn) {
       <a routerLink="/login" class="btn btn-outline">Se connecter</a>
       <a routerLink="/register" class="btn btn-primary">S'enregistrer</a>
-    </ng-container>
-
-    <ng-template #loggedIn>
+    } @else {
       <span class="avatar">{{ initials }}</span>
       <button type="button" class="hamburger" (click)="toggleMenu()" aria-label="Ouvrir le menu">
         <span></span>
         <span></span>
         <span></span>
       </button>
-    </ng-template>
+    }
   </div>
 </nav>

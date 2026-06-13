@@ -1,12 +1,20 @@
+<app-navbar></app-navbar>
+
 <div class="padel-container">
   <h2>Terrains de Padel</h2>
-  <div *ngIf="loading">Chargement...</div>
-  <div *ngIf="error" class="error-message">{{ error }}</div>
-  <div *ngIf="!loading && !error">
-    <div *ngFor="let terrain of terrains" class="terrain-card">
-      <h3>{{ terrain.nom }}</h3>
-      <p>Type: {{ terrain.type }}</p>
-      <p>Disponible: {{ terrain.disponible ? 'Oui' : 'Non' }}</p>
-    </div>
-  </div>
+  @if (loading) {
+    <div>Chargement...</div>
+  }
+  @if (error) {
+    <div class="error-message">{{ error }}</div>
+  }
+  @if (!loading && !error) {
+    @for (terrain of terrains; track terrain.id) {
+      <div class="terrain-card">
+        <h3>{{ terrain.nom }}</h3>
+        <p>Type: {{ terrain.type }}</p>
+        <p>Disponible: {{ terrain.disponible ? 'Oui' : 'Non' }}</p>
+      </div>
+    }
+  }
 </div>

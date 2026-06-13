@@ -5,23 +5,35 @@
     <div class="form-group">
       <label for="email">Email</label>
       <input type="email" id="email" formControlName="email" class="form-control">
-      <div *ngIf="email?.invalid && (email?.dirty || email?.touched)" class="error-message">
-        <small *ngIf="email?.errors?.['required']">Email is required.</small>
-        <small *ngIf="email?.errors?.['email']">Please enter a valid email.</small>
-      </div>
+      @if (email?.invalid && (email?.dirty || email?.touched)) {
+        <div class="error-message">
+          @if (email?.errors?.['required']) {
+            <small>Email is required.</small>
+          }
+          @if (email?.errors?.['email']) {
+            <small>Please enter a valid email.</small>
+          }
+        </div>
+      }
     </div>
 
     <div class="form-group">
       <label for="motDePasse">Password</label>
       <input type="password" id="motDePasse" formControlName="motDePasse" class="form-control">
-      <div *ngIf="motDePasse?.invalid && (motDePasse?.dirty || motDePasse?.touched)" class="error-message">
-        <small *ngIf="motDePasse?.errors?.['required']">Password is required.</small>
-      </div>
+      @if (motDePasse?.invalid && (motDePasse?.dirty || motDePasse?.touched)) {
+        <div class="error-message">
+          @if (motDePasse?.errors?.['required']) {
+            <small>Password is required.</small>
+          }
+        </div>
+      }
     </div>
 
-    <div *ngIf="serverError" class="error-message server-error">
-      <small>{{ serverError }}</small>
-    </div>
+    @if (serverError) {
+      <div class="error-message server-error">
+        <small>{{ serverError }}</small>
+      </div>
+    }
 
     <button type="submit" [disabled]="loginForm.invalid" class="btn-login">Login</button>
 

@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FideliteService } from '../../services/api/fidelite.service';
 import { CarteFidelite, Transaction } from '../../services/api/models/carte-fidelite.model';
 import { AuthStateService } from '../../services/auth-state.service';
+import { NavbarComponent } from '../../components/navbar/navbar.component';
 
 @Component({
   selector: 'app-fidelite-page',
-  imports: [CommonModule],
+  imports: [NavbarComponent],
   templateUrl: './fidelite-page.component.html',
   styleUrl: './fidelite-page.component.css'
 })

@@ -1,21 +1,27 @@
 <aside class="side-menu" [class.open]="isOpen">
   <!-- Déconnecté : invitation à se connecter -->
-  <div class="side-menu-message" *ngIf="!isLoggedIn">
-    Veuillez vous connecter pour accéder aux fonctionnalités
-  </div>
-
-  <!-- Connecté : profil + liens filtrés par rôle -->
-  <ng-container *ngIf="isLoggedIn">
+  @if (!isLoggedIn) {
+    <div class="side-menu-message">
+      Veuillez vous connecter pour accéder aux fonctionnalités
+    </div>
+  } @else {
+    <!-- Connecté : profil + liens filtrés par rôle -->
     <div class="side-menu-profile">
       <span class="avatar">{{ initials }}</span>
       <span class="profile-name">{{ fullName }}</span>
     </div>
 
     <ul class="side-menu-links">
-      <li class="link" *ngFor="let link of visibleLinks">
-        <span class="link-label">{{ link.label }}</span>
-        <span class="link-badge" [style.color]="link.color">{{ link.badge }}</span>
-      </li>
+      @for (link of visibleLinks; track link.label) {
+        <li class="link">
+          <span class="link-label">{{ link.label }}</span>
+          <span class="link-badge" [style.color]="link.color">{{ link.badge }}</span>
+        </li>
+      }
     </ul>
-  </ng-container>
+
+    <div class="side-menu-footer">
+      <button type="button" class="btn-logout" (click)="logout()">Se déconnecter</button>
+    </div>
+  }
 </aside>

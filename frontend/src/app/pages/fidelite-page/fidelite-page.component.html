@@ -1,8 +1,14 @@
+<app-navbar></app-navbar>
+
 <div class="fidelite-container">
   <h2>Carte Fidélité</h2>
-  <div *ngIf="loading">Chargement...</div>
-  <div *ngIf="error" class="error-message">{{ error }}</div>
-  <div *ngIf="!loading && !error && carte">
+  @if (loading) {
+    <div>Chargement...</div>
+  }
+  @if (error) {
+    <div class="error-message">{{ error }}</div>
+  }
+  @if (!loading && !error && carte) {
     <p>Points: {{ carte.points }}</p>
-  </div>
+  }
 </div>

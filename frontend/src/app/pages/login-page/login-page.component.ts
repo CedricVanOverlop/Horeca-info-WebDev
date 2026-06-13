@@ -1,13 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
 import { AuthStateService } from '../../services/auth-state.service';
 import { AuthenticationRequest } from '../../services/api/models/authentication-request.model';
 import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-login-page',
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './login-page.component.html',
   styleUrls: ['./login-page.component.css']
 })

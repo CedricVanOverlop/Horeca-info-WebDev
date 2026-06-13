@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { PlanningService } from '../../services/api/planning.service';
 import { Planning } from '../../services/api/models/planning.model';
 import { AuthStateService } from '../../services/auth-state.service';
+import { NavbarComponent } from '../../components/navbar/navbar.component';
 
 @Component({
   selector: 'app-planning-page',
-  imports: [CommonModule],
+  imports: [NavbarComponent],
   templateUrl: './planning-page.component.html',
   styleUrl: './planning-page.component.css'
 })

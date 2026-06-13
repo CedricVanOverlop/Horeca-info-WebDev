@@ -1,12 +1,20 @@
+<app-navbar></app-navbar>
+
 <div class="personnel-container">
   <h2>Personnel</h2>
-  <div *ngIf="loading">Chargement...</div>
-  <div *ngIf="error" class="error-message">{{ error }}</div>
-  <div *ngIf="!loading && !error">
-    <div *ngFor="let employe of employes" class="employe-card">
-      <h3>{{ employe.nom }} {{ employe.prenom }}</h3>
-      <p>Email: {{ employe.email }}</p>
-      <p>Poste: {{ employe.poste }}</p>
-    </div>
-  </div>
+  @if (loading) {
+    <div>Chargement...</div>
+  }
+  @if (error) {
+    <div class="error-message">{{ error }}</div>
+  }
+  @if (!loading && !error) {
+    @for (employe of employes; track employe.id) {
+      <div class="employe-card">
+        <h3>{{ employe.nom }} {{ employe.prenom }}</h3>
+        <p>Email: {{ employe.email }}</p>
+        <p>Poste: {{ employe.poste }}</p>
+      </div>
+    }
+  }
 </div>
