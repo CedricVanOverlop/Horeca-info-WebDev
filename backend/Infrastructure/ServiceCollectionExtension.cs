@@ -25,6 +25,7 @@ public static class ServiceCollectionExtension
         services.AddScoped<IPlanningRepository, PlanningRepository>();
         services.AddScoped<IReservationRepository, ReservationRepository>();
         services.AddScoped<ITerrainRepository, TerrainRepository>();
+        services.AddScoped<ITarifRepository, TarifRepository>();
 
         services.AddScoped<IUserGateway, UserGateway>();
         services.AddScoped<IEmployeGateway, EmployeGateway>();
@@ -33,6 +34,7 @@ public static class ServiceCollectionExtension
         services.AddScoped<IPlanningGateway, PlanningGateway>();
         services.AddScoped<IReservationGateway, ReservationGateway>();
         services.AddScoped<ITerrainGateway, TerrainGateway>();
+        services.AddScoped<ITarifGateway, TarifGateway>();
 
         return services;
     }

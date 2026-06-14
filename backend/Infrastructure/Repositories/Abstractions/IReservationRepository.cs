@@ -8,4 +8,5 @@ public interface IReservationRepository
     Task<IEnumerable<ReservationDb>> GetByUserId(int userId);
     Task<string> Create(ReservationDb reservation);
     Task Delete(string id);
+    Task<int> DeleteFutureByUserId(int userId);
 }

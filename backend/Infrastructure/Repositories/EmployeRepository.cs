@@ -83,4 +83,14 @@ public class EmployeRepository(IDbConnection connection) : IEmployeRepository
         const string sql = "DELETE FROM EMPLOYE WHERE id_employe = @Id";
         await connection.ExecuteAsync(sql, new { Id = id });
     }
+
+    /// <summary>
+    /// Désactive un employé (actif = FALSE) sans supprimer la ligne. Le rend non planifiable (RG-07).
+    /// </summary>
+    /// <param name="id">Identifiant de l'employé à désactiver.</param>
+    public async Task Deactivate(int id)
+    {
+        const string sql = "UPDATE EMPLOYE SET actif = FALSE WHERE id_employe = @Id";
+        await connection.ExecuteAsync(sql, new { Id = id });
+    }
 }

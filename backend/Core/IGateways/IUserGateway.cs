@@ -7,4 +7,7 @@ public interface IUserGateway
     Task<User?> Authenticate(string email, string motDePasse);
     Task<User> Register(RegisterRequest request);
     Task<IEnumerable<User>> GetAll();
+    Task<bool> UpdateInfos(UpdateUserRequest request);
+    Task<bool> UpdatePassword(int id, string nouveauMotDePasse);
+    Task<bool> DeleteAccount(int id);
 }

@@ -10,4 +10,5 @@ public interface IEmployeRepository
     Task<int> Create(EmployeDb employe);
     Task Update(EmployeDb employe);
     Task Delete(int id);
+    Task Deactivate(int id);
 }

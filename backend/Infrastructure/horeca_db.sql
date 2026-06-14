@@ -48,6 +48,7 @@ CREATE TABLE UTILISATEUR (
     mot_de_passe   VARCHAR(255)  NOT NULL,   -- Hash BCrypt, jamais en clair
     telephone      VARCHAR(20)   NULL,        -- Format libre : +32 471 12 34 56
     points_solde   DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    actif          BOOLEAN       NOT NULL DEFAULT TRUE,  -- Soft-delete : FALSE = compte supprimé (historique conservé)
 
     CONSTRAINT pk_utilisateur    PRIMARY KEY (id_utilisateur),
     CONSTRAINT uq_email          UNIQUE      (email),

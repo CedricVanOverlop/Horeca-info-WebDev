@@ -33,4 +33,10 @@ public class ReservationRepository(IDbConnection connection) : IReservationRepos
         const string sql = "DELETE FROM Reservations WHERE Id = @Id";
         await connection.ExecuteAsync(sql, new { Id = id });
     }
+
+    public async Task<int> DeleteFutureByUserId(int userId)
+    {
+        const string sql = "DELETE FROM Reservations WHERE UserId = @UserId AND DateDebut > NOW()";
+        return await connection.ExecuteAsync(sql, new { UserId = userId });
+    }
 }

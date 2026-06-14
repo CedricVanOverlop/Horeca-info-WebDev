@@ -2,6 +2,7 @@ using Api.Services;
 using Core.Models;
 using Core.UseCases.Abstractions;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Api.EndPoints;
 
@@ -29,5 +30,44 @@ public static class UtilisateurRoutes
             var users = await useCases.GetAll();
             return Results.Ok(users);
         }).RequireAuthorization("AdminOnly");
+
+        group.MapPut("/me", async ([FromBody] UpdateUserRequest request, ClaimsPrincipal principal, IUserUseCases useCases) =>
+        {
+            var id = GetUserId(principal);
+            if (id is null) return Results.Unauthorized();
+
+            var updated = await useCases.UpdateInfos(id.Value, request);
+            return updated ? Results.Ok() : Results.NotFound();
+        }).RequireAuthorization();
+
+        group.MapPut("/me/password", async ([FromBody] ChangePasswordRequest request, ClaimsPrincipal principal, IUserUseCases useCases) =>
+        {
+            var id = GetUserId(principal);
+            if (id is null) return Results.Unauthorized();
+
+            var updated = await useCases.UpdatePassword(id.Value, request);
+            return updated ? Results.Ok() : Results.NotFound();
+        }).RequireAuthorization();
+
+        group.MapDelete("/me", async (ClaimsPrincipal principal, IUserUseCases useCases) =>
+        {
+            var id = GetUserId(principal);
+            if (id is null) return Results.Unauthorized();
+
+            var deleted = await useCases.DeleteAccount(id.Value);
+            return deleted ? Results.NoContent() : Results.NotFound();
+        }).RequireAuthorization();
+    }
+
+    /// <summary>
+    /// Extrait l'identifiant de l'utilisateur courant depuis les claims du JWT.
+    /// Le claim "sub" est remappé sur ClaimTypes.NameIdentifier par défaut.
+    /// </summary>
+    /// <param name="principal">Identité de l'utilisateur authentifié.</param>
+    /// <returns>L'identifiant de l'utilisateur, ou null si absent/invalide.</returns>
+    private static int? GetUserId(ClaimsPrincipal principal)
+    {
+        var raw = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+        return int.TryParse(raw, out var id) ? id : null;
     }
 }

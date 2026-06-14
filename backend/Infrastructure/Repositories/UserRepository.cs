@@ -17,7 +17,8 @@ public class UserRepository(IDbConnection connection) : IUserRepository
     {
         const string sql = @"
             SELECT id_utilisateur AS Id, nom AS Nom, prenom AS Prenom, email AS Email,
-                   mot_de_passe AS MotDePasse, telephone AS Telephone, points_solde AS PointsSolde
+                   mot_de_passe AS MotDePasse, telephone AS Telephone, points_solde AS PointsSolde,
+                   actif AS Actif
             FROM UTILISATEUR WHERE email = @Email LIMIT 1";
         return await connection.QueryFirstOrDefaultAsync<UserDb>(sql, new { Email = email });
     }
@@ -52,8 +53,78 @@ public class UserRepository(IDbConnection connection) : IUserRepository
     {
         const string sql = @"
             SELECT id_utilisateur AS Id, nom AS Nom, prenom AS Prenom, email AS Email,
-                   telephone AS Telephone, points_solde AS PointsSolde
-            FROM UTILISATEUR";
+                   telephone AS Telephone, points_solde AS PointsSolde, actif AS Actif
+            FROM UTILISATEUR WHERE actif = TRUE";
         return await connection.QueryAsync<UserDb>(sql);
+    }
+
+
+    /// <summary>
+    /// Met à jour les informations personnelles d'un utilisateur.
+    /// </summary>
+    /// <param name="request">Nouvelles données de l'utilisateur.</param>
+    /// <returns>Le nombre de lignes affectées (1 si succès, 0 si utilisateur introuvable).</returns>
+    public async Task<int> UpdateInfos(UpdateUserRequest request)
+    {
+        const string sql = @"
+            UPDATE UTILISATEUR 
+            SET nom = @Nom, prenom = @Prenom, email = @Email, telephone = @Telephone
+            WHERE id_utilisateur = @Id";
+        return await connection.ExecuteAsync(sql, new
+        {
+            request.Nom,
+            request.Prenom,
+            request.Email,
+            request.Telephone,
+            request.Id
+        });
+    }
+
+    /// <summary>
+    /// Met à jour le mot de passe d'un utilisateur.
+    /// </summary>
+    /// <param name="id">Id de l'utilisateur.</param>
+    /// <param name="hashedPassword"> Nouveau Mot De Passe.</param>
+    /// <returns>Le nombre de lignes affectées (1 si succès, 0 si utilisateur introuvable).</returns>
+    public async Task<int> UpdatePassword(int id, string hashedPassword)
+    {
+        const string sql = @"
+            UPDATE UTILISATEUR 
+            SET mot_de_passe = @MotDePasse
+            WHERE id_utilisateur = @Id";
+        return await connection.ExecuteAsync(sql, new
+        {
+            MotDePasse = hashedPassword,
+            Id = id
+        });
+    }
+
+    /// <summary>
+    /// Désactive (soft-delete) un utilisateur : passe actif à FALSE sans supprimer la ligne.
+    /// Préserve l'historique (réservations passées, transactions fidélité) et les contraintes FK.
+    /// </summary>
+    /// <param name="id">Identifiant de l'utilisateur à désactiver.</param>
+    /// <returns>Le nombre de lignes affectées (1 si succès, 0 si utilisateur introuvable ou déjà inactif).</returns>
+    public async Task<int> Deactivate(int id)
+    {
+        const string sql = @"
+            UPDATE UTILISATEUR
+            SET actif = FALSE
+            WHERE id_utilisateur = @Id AND actif = TRUE";
+        return await connection.ExecuteAsync(sql, new { Id = id });
+    }
+
+    /// <summary>
+    /// Réactive (annule le soft-delete) un utilisateur : repasse actif à TRUE.
+    /// </summary>
+    /// <param name="id">Identifiant de l'utilisateur à réactiver.</param>
+    /// <returns>Le nombre de lignes affectées.</returns>
+    public async Task<int> Reactivate(int id)
+    {
+        const string sql = @"
+            UPDATE UTILISATEUR
+            SET actif = TRUE
+            WHERE id_utilisateur = @Id";
+        return await connection.ExecuteAsync(sql, new { Id = id });
     }
 }
