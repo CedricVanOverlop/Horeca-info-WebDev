@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -8,11 +8,11 @@ import {
   ValidationErrors,
   ValidatorFn,
 } from '@angular/forms';
-import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthStateService } from '../../services/auth-state.service';
 import { UsersService } from '../../services/api/users.service';
 import { UserProfile } from '../../services/api/models/user-profile.model';
+import { NavbarComponent } from '../../components/navbar/navbar.component';
 
 /**
  * Validateur personnalisé : vérifie que "confirmerMotDePasse" correspond à "nouveauMotDePasse".
@@ -39,7 +39,7 @@ const passwordMatchValidator: ValidatorFn = (group: AbstractControl): Validation
 @Component({
   selector: 'app-compte-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule, NavbarComponent],
   templateUrl: './mon-compte-page.component.html',
   styleUrls: ['./mon-compte-page.component.css'],
 })
@@ -73,7 +73,8 @@ export class MonComptePageComponent implements OnInit {
     private fb: FormBuilder,
     private usersService: UsersService,
     private authStateService: AuthStateService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   // ─────────────────────────────────────────────────────────────
@@ -102,7 +103,7 @@ export class MonComptePageComponent implements OnInit {
     this.passwordForm = this.fb.group(
       {
         motDePasseActuel:   ['', [Validators.required]],
-        nouveauMotDePasse:  ['', [Validators.required, Validators.minLength(8)]],
+        nouveauMotDePasse:  ['', [Validators.required]],
         confirmerMotDePasse:['', [Validators.required]],
       },
       { validators: passwordMatchValidator }
@@ -126,10 +127,12 @@ export class MonComptePageComponent implements OnInit {
           telephone: profile.telephone ?? '',
         });
         this.isLoading = false;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.profileError = 'Impossible de charger le profil. Veuillez réessayer.';
         this.isLoading = false;
+        this.cdr.markForCheck();
       },
     });
   }
@@ -183,10 +186,12 @@ export class MonComptePageComponent implements OnInit {
         if (this.profile) {
           this.profile = { ...this.profile, ...this.profileForm.value };
         }
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.profileError = err?.error?.message ?? 'Erreur lors de la mise à jour du profil.';
         this.isSubmittingProfile = false;
+        this.cdr.markForCheck();
       },
     });
   }
@@ -212,10 +217,12 @@ export class MonComptePageComponent implements OnInit {
         this.passwordSuccess = true;
         this.passwordForm.reset();
         this.isSubmittingPassword = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.passwordError = err?.error?.message ?? 'Erreur lors du changement de mot de passe.';
         this.isSubmittingPassword = false;
+        this.cdr.markForCheck();
       },
     });
   }
@@ -261,6 +268,7 @@ export class MonComptePageComponent implements OnInit {
       error: (err) => {
         this.deleteError = err?.error?.message ?? 'Erreur lors de la suppression du compte.';
         this.isDeletingAccount = false;
+        this.cdr.markForCheck();
       },
     });
   }

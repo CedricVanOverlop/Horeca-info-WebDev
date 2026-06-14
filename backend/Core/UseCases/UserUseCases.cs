@@ -50,6 +50,14 @@ public class UserUseCases(IUserGateway userGateway) : IUserUseCases
     public Task<User?> GetProfile(int id) => userGateway.GetProfile(id);
 
     /// <summary>
+    /// Indique si l'utilisateur est actif. Utilisé par le middleware pour rejeter
+    /// les requêtes d'un compte soft-deleted dont le token est encore valide.
+    /// </summary>
+    /// <param name="id">Identifiant de l'utilisateur (extrait du JWT).</param>
+    /// <returns>True si actif, false sinon.</returns>
+    public Task<bool> IsActive(int id) => userGateway.IsActive(id);
+
+    /// <summary>
     /// Met à jour les informations personnelles de l'utilisateur identifié par le token.
     /// </summary>
     /// <param name="id">Identifiant de l'utilisateur (extrait du JWT, jamais du body).</param>
@@ -77,10 +85,12 @@ public class UserUseCases(IUserGateway userGateway) : IUserUseCases
     /// <exception cref="ValidationException">Si le nouveau mot de passe est vide.</exception>
     public Task<bool> UpdatePassword(int id, ChangePasswordRequest request)
     {
+        if (string.IsNullOrWhiteSpace(request.AncienMotDePasse))
+            throw new ValidationException("Le mot de passe actuel est requis.");
         if (string.IsNullOrWhiteSpace(request.NouveauMotDePasse))
             throw new ValidationException("Le nouveau mot de passe est requis.");
 
-        return userGateway.UpdatePassword(id, request.NouveauMotDePasse);
+        return userGateway.UpdatePassword(id, request.AncienMotDePasse, request.NouveauMotDePasse);
     }
 
     /// <summary>

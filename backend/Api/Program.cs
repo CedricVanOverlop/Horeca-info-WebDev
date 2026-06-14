@@ -60,9 +60,17 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
-app.UseHttpsRedirection();
+
+// Pas de redirection HTTPS en développement : elle renvoie un 307 sur le preflight CORS
+// (OPTIONS), ce qui casse les appels du front Angular servi en http://localhost:4200.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
 app.UseCors();
 app.UseAuthentication();
+app.UseMiddleware<ActiveUserMiddleware>();
 app.UseAuthorization();
 
 app.MapUtilisateurRoutes();

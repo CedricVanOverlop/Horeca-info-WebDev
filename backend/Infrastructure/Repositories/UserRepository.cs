@@ -24,6 +24,32 @@ public class UserRepository(IDbConnection connection) : IUserRepository
     }
 
     /// <summary>
+    /// Indique si l'utilisateur existe et est actif (non soft-deleted).
+    /// </summary>
+    /// <param name="id">Identifiant de l'utilisateur.</param>
+    /// <returns>True si l'utilisateur est actif, false sinon.</returns>
+    public async Task<bool> IsActive(int id)
+    {
+        const string sql = @"
+            SELECT COUNT(1)
+            FROM UTILISATEUR WHERE id_utilisateur = @Id AND actif = TRUE";
+        return await connection.ExecuteScalarAsync<bool>(sql, new { Id = id });
+    }
+
+    /// <summary>
+    /// Retourne le hash BCrypt du mot de passe d'un utilisateur actif. Null si introuvable ou désactivé.
+    /// </summary>
+    /// <param name="id">Identifiant de l'utilisateur.</param>
+    /// <returns>Le hash BCrypt stocké, ou null.</returns>
+    public async Task<string?> GetPasswordHash(int id)
+    {
+        const string sql = @"
+            SELECT mot_de_passe
+            FROM UTILISATEUR WHERE id_utilisateur = @Id AND actif = TRUE LIMIT 1";
+        return await connection.QueryFirstOrDefaultAsync<string?>(sql, new { Id = id });
+    }
+
+    /// <summary>
     /// Recherche un utilisateur actif par son identifiant. Retourne null si introuvable ou désactivé.
     /// </summary>
     /// <param name="id">Identifiant de l'utilisateur.</param>

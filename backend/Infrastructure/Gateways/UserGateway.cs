@@ -168,6 +168,13 @@ public class UserGateway(
     }
 
     /// <summary>
+    /// Indique si l'utilisateur existe et est actif (non soft-deleted).
+    /// </summary>
+    /// <param name="id">Identifiant de l'utilisateur.</param>
+    /// <returns>True si actif, false sinon.</returns>
+    public Task<bool> IsActive(int id) => userRepository.IsActive(id);
+
+    /// <summary>
     /// Met à jour les informations personnelles d'un utilisateur (nom, prénom, email, téléphone).
     /// </summary>
     /// <param name="request">Nouvelles données de l'utilisateur, identifié par son Id.</param>
@@ -187,13 +194,32 @@ public class UserGateway(
     }
 
     /// <summary>
-    /// Hash le nouveau mot de passe en BCrypt puis le persiste pour l'utilisateur ciblé.
+    /// Change le mot de passe : vérifie d'abord l'ancien mot de passe via BCrypt, puis hash
+    /// et persiste le nouveau. Empêche un changement avec un simple token volé sans connaître
+    /// le mot de passe actuel.
     /// </summary>
     /// <param name="id">Identifiant de l'utilisateur.</param>
+    /// <param name="ancienMotDePasse">Mot de passe actuel en clair (vérifié contre le hash stocké).</param>
     /// <param name="nouveauMotDePasse">Nouveau mot de passe en clair (hashé ici avant insertion).</param>
-    /// <returns>True si le mot de passe a été mis à jour, false si l'utilisateur est introuvable.</returns>
-    public async Task<bool> UpdatePassword(int id, string nouveauMotDePasse)
+    /// <returns>True si mis à jour, false si l'utilisateur est introuvable.</returns>
+    /// <exception cref="ValidationException">Si l'ancien mot de passe est incorrect.</exception>
+    public async Task<bool> UpdatePassword(int id, string ancienMotDePasse, string nouveauMotDePasse)
     {
+        var currentHash = await userRepository.GetPasswordHash(id);
+        if (currentHash is null) return false;
+
+        bool ancienValide;
+        try
+        {
+            ancienValide = BCrypt.Net.BCrypt.Verify(ancienMotDePasse, currentHash);
+        }
+        catch (BCrypt.Net.SaltParseException)
+        {
+            ancienValide = false;
+        }
+        if (!ancienValide)
+            throw new ValidationException("Mot de passe actuel incorrect.");
+
         var hashedPassword = BCrypt.Net.BCrypt.HashPassword(nouveauMotDePasse);
         var rows = await userRepository.UpdatePassword(id, hashedPassword);
         return rows > 0;

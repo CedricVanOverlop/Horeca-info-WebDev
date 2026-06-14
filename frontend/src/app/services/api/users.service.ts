@@ -41,13 +41,17 @@ export class UsersService {
 
   /**
    * Change le mot de passe de l'utilisateur connecté.
-   * Seul le nouveau mot de passe est transmis ; les autres champs sont validés côté client.
+   * L'ancien mot de passe est vérifié côté serveur (BCrypt) avant l'écrasement.
+   * `confirmerMotDePasse` ne sert qu'à la validation côté client.
    * @param request Données du formulaire de changement de mot de passe.
    */
   changeMyPassword(request: ChangePasswordRequest): Observable<void> {
     return this.http.put<void>(
       `${this.apiUrl}/me/password`,
-      { nouveauMotDePasse: request.nouveauMotDePasse },
+      {
+        ancienMotDePasse: request.motDePasseActuel,
+        nouveauMotDePasse: request.nouveauMotDePasse
+      },
       { headers: this.authStateService.getAuthHeaders() }
     );
   }
