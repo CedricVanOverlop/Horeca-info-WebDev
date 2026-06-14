@@ -15,4 +15,14 @@ public interface IUserRepository
     Task<int> UpdatePassword(int id, string hashedPassword);
     Task<int> Deactivate(int id);
     Task<int> Reactivate(int id);
+
+    // ── Administration ────────────────────────────────────────────
+    Task<IEnumerable<UserAdminDb>> GetAllForAdmin();
+    Task UpsertEmploye(int idUtilisateur, string acces);
+    Task DeleteEmploye(int idUtilisateur);
+    Task<int> CountActiveAdmins();
+    Task<bool> IsActiveAdmin(int idUtilisateur);
+    Task<bool> AdjustPoints(int idUtilisateur, decimal montant, string type, string motif);
+    Task<IEnumerable<ReservationAdminDb>> GetReservationsByUtilisateur(int idUtilisateur);
+    Task<IEnumerable<HoraireAdminDb>> GetHorairesByUtilisateur(int idUtilisateur);
 }

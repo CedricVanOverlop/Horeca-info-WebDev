@@ -248,4 +248,127 @@ public class UserGateway(
         var rows = await userRepository.Deactivate(id);
         return rows > 0;
     }
+
+    // ── Administration ────────────────────────────────────────────
+
+    /// <summary>
+    /// Retourne tous les utilisateurs (actifs et bloqués) avec leur rôle résolu, pour l'administration.
+    /// </summary>
+    /// <returns>La liste complète des utilisateurs.</returns>
+    public async Task<IEnumerable<UserAdmin>> GetAllForAdmin()
+    {
+        var dbs = await userRepository.GetAllForAdmin();
+        return dbs.Select(db => new UserAdmin
+        {
+            Id          = db.Id,
+            Nom         = db.Nom,
+            Prenom      = db.Prenom,
+            Email       = db.Email,
+            PointsSolde = db.PointsSolde,
+            Role        = db.Role,
+            Actif       = db.Actif
+        });
+    }
+
+    /// <summary>
+    /// Change le niveau d'accès d'un utilisateur. 'Client' supprime la ligne EMPLOYE,
+    /// les rôles staff la créent ou la mettent à jour.
+    /// </summary>
+    /// <param name="id">Identifiant de l'utilisateur.</param>
+    /// <param name="acces">Niveau d'accès cible.</param>
+    public async Task ChangeRole(int id, string acces)
+    {
+        if (acces == "Client")
+            await userRepository.DeleteEmploye(id);
+        else
+            await userRepository.UpsertEmploye(id, acces);
+    }
+
+    /// <summary>
+    /// Indique si l'utilisateur est le dernier administrateur actif du système.
+    /// </summary>
+    /// <param name="id">Identifiant de l'utilisateur.</param>
+    /// <returns>True si c'est un administrateur actif et le seul restant.</returns>
+    public async Task<bool> IsLastActiveAdmin(int id)
+    {
+        if (!await userRepository.IsActiveAdmin(id))
+            return false;
+        return await userRepository.CountActiveAdmins() <= 1;
+    }
+
+    /// <summary>
+    /// Ajuste le solde de points (RG-03). Le signe du montant détermine le type de transaction.
+    /// </summary>
+    /// <param name="id">Identifiant de l'utilisateur.</param>
+    /// <param name="montant">Montant signé de l'ajustement.</param>
+    /// <param name="motif">Motif de l'ajustement.</param>
+    /// <returns>True si appliqué, false si le solde deviendrait négatif (RG-02).</returns>
+    public Task<bool> AdjustPoints(int id, decimal montant, string motif)
+    {
+        // type_transaction contraint à { GAIN, DEPENSE, EXPIRATION, AJUSTEMENT } :
+        // crédit = GAIN, débit = DEPENSE (cohérent avec la formule du solde).
+        var type = montant >= 0 ? "GAIN" : "DEPENSE";
+        return userRepository.AdjustPoints(id, montant, type, motif);
+    }
+
+    /// <summary>
+    /// Bloque un compte : désactivation (actif = FALSE), l'utilisateur ne peut plus se connecter.
+    /// </summary>
+    /// <param name="id">Identifiant de l'utilisateur.</param>
+    /// <returns>True si bloqué, false si introuvable ou déjà bloqué.</returns>
+    public async Task<bool> Block(int id)
+    {
+        var rows = await userRepository.Deactivate(id);
+        return rows > 0;
+    }
+
+    /// <summary>
+    /// Débloque un compte : réactivation (actif = TRUE).
+    /// </summary>
+    /// <param name="id">Identifiant de l'utilisateur.</param>
+    /// <returns>True si débloqué.</returns>
+    public async Task<bool> Unblock(int id)
+    {
+        var rows = await userRepository.Reactivate(id);
+        return rows > 0;
+    }
+
+    /// <summary>
+    /// Retourne les réservations d'un utilisateur, vue administrateur.
+    /// </summary>
+    /// <param name="id">Identifiant de l'utilisateur.</param>
+    /// <returns>Les réservations de l'utilisateur.</returns>
+    public async Task<IEnumerable<ReservationAdmin>> GetReservations(int id)
+    {
+        var dbs = await userRepository.GetReservationsByUtilisateur(id);
+        return dbs.Select(db => new ReservationAdmin
+        {
+            Id         = db.Id,
+            Date       = db.Date,
+            HeureDebut = db.HeureDebut,
+            HeureFin   = db.HeureFin,
+            PrixPaye   = db.PrixPaye,
+            Terrain    = db.Terrain
+        });
+    }
+
+    /// <summary>
+    /// Retourne les horaires de travail d'un utilisateur employé, vue administrateur.
+    /// </summary>
+    /// <param name="id">Identifiant de l'utilisateur.</param>
+    /// <returns>Les horaires de l'utilisateur.</returns>
+    public async Task<IEnumerable<HoraireAdmin>> GetHoraires(int id)
+    {
+        var dbs = await userRepository.GetHorairesByUtilisateur(id);
+        return dbs.Select(db => new HoraireAdmin
+        {
+            Id         = db.Id,
+            Date       = db.Date,
+            HeureDebut = db.HeureDebut,
+            HeureFin   = db.HeureFin,
+            HeurePayee = db.HeurePayee,
+            Statut     = db.Statut,
+            Commerce   = db.Commerce
+        });
+    }
 }

@@ -167,4 +167,161 @@ public class UserRepository(IDbConnection connection) : IUserRepository
             WHERE id_utilisateur = @Id";
         return await connection.ExecuteAsync(sql, new { Id = id });
     }
+
+    // ── Administration ────────────────────────────────────────────
+
+    /// <summary>
+    /// Retourne tous les utilisateurs (actifs ET bloqués) avec leur rôle résolu,
+    /// pour la console d'administration. Le rôle vaut l'accès de l'EMPLOYE actif, sinon 'Client'.
+    /// </summary>
+    /// <returns>La liste complète des utilisateurs vue administrateur.</returns>
+    public async Task<IEnumerable<UserAdminDb>> GetAllForAdmin()
+    {
+        const string sql = @"
+            SELECT u.id_utilisateur AS Id, u.nom AS Nom, u.prenom AS Prenom, u.email AS Email,
+                   u.points_solde AS PointsSolde, u.actif AS Actif,
+                   CASE WHEN e.id_employe IS NOT NULL AND e.actif = TRUE
+                        THEN e.acces ELSE 'Client' END AS Role
+            FROM UTILISATEUR u
+            LEFT JOIN EMPLOYE e ON e.id_utilisateur = u.id_utilisateur
+            ORDER BY u.nom, u.prenom";
+        return await connection.QueryAsync<UserAdminDb>(sql);
+    }
+
+    /// <summary>
+    /// Crée ou réactive la ligne EMPLOYE d'un utilisateur avec le niveau d'accès donné.
+    /// </summary>
+    /// <param name="idUtilisateur">Identifiant de l'utilisateur.</param>
+    /// <param name="acces">Niveau d'accès staff ('Employe', 'Cuisine', 'Administrateur').</param>
+    public async Task UpsertEmploye(int idUtilisateur, string acces)
+    {
+        const string sql = @"
+            INSERT INTO EMPLOYE (id_utilisateur, acces, actif)
+            VALUES (@IdUtilisateur, @Acces, TRUE)
+            ON DUPLICATE KEY UPDATE acces = @Acces, actif = TRUE";
+        await connection.ExecuteAsync(sql, new { IdUtilisateur = idUtilisateur, Acces = acces });
+    }
+
+    /// <summary>
+    /// Supprime la ligne EMPLOYE d'un utilisateur (rétrogradation au rôle Client).
+    /// </summary>
+    /// <param name="idUtilisateur">Identifiant de l'utilisateur.</param>
+    public async Task DeleteEmploye(int idUtilisateur)
+    {
+        const string sql = "DELETE FROM EMPLOYE WHERE id_utilisateur = @IdUtilisateur";
+        await connection.ExecuteAsync(sql, new { IdUtilisateur = idUtilisateur });
+    }
+
+    /// <summary>
+    /// Compte les administrateurs actifs (EMPLOYE actif + compte utilisateur non bloqué).
+    /// </summary>
+    /// <returns>Le nombre d'administrateurs actifs.</returns>
+    public async Task<int> CountActiveAdmins()
+    {
+        const string sql = @"
+            SELECT COUNT(*)
+            FROM EMPLOYE e
+            JOIN UTILISATEUR u ON u.id_utilisateur = e.id_utilisateur
+            WHERE e.acces = 'Administrateur' AND e.actif = TRUE AND u.actif = TRUE";
+        return await connection.ExecuteScalarAsync<int>(sql);
+    }
+
+    /// <summary>
+    /// Indique si l'utilisateur est un administrateur actif (rôle Administrateur + compte non bloqué).
+    /// </summary>
+    /// <param name="idUtilisateur">Identifiant de l'utilisateur.</param>
+    /// <returns>True si administrateur actif.</returns>
+    public async Task<bool> IsActiveAdmin(int idUtilisateur)
+    {
+        const string sql = @"
+            SELECT COUNT(1)
+            FROM EMPLOYE e
+            JOIN UTILISATEUR u ON u.id_utilisateur = e.id_utilisateur
+            WHERE e.id_utilisateur = @Id AND e.acces = 'Administrateur'
+              AND e.actif = TRUE AND u.actif = TRUE";
+        return await connection.ExecuteScalarAsync<bool>(sql, new { Id = idUtilisateur });
+    }
+
+    /// <summary>
+    /// Ajuste le solde de points d'un utilisateur de manière atomique (RG-03) :
+    /// met à jour points_solde et insère une ligne TRANSACTION_FIDELITE dans la même
+    /// transaction SQL. Refuse l'opération si le solde résultant serait négatif (RG-02).
+    /// </summary>
+    /// <param name="idUtilisateur">Identifiant de l'utilisateur.</param>
+    /// <param name="montant">Montant signé de l'ajustement (positif = crédit, négatif = débit).</param>
+    /// <param name="type">Type de transaction stocké ('Ajustement_credit' ou 'Ajustement_debit').</param>
+    /// <param name="motif">Motif de l'ajustement (description).</param>
+    /// <returns>True si appliqué, false si le solde deviendrait négatif ou l'utilisateur est introuvable.</returns>
+    public async Task<bool> AdjustPoints(int idUtilisateur, decimal montant, string type, string motif)
+    {
+        if (connection.State != ConnectionState.Open)
+            connection.Open();
+
+        using var transaction = connection.BeginTransaction();
+        try
+        {
+            const string updateSql = @"
+                UPDATE UTILISATEUR
+                SET points_solde = points_solde + @Montant
+                WHERE id_utilisateur = @Id AND points_solde + @Montant >= 0";
+            var rows = await connection.ExecuteAsync(updateSql,
+                new { Montant = montant, Id = idUtilisateur }, transaction);
+
+            if (rows == 0)
+            {
+                transaction.Rollback();
+                return false; // solde insuffisant ou utilisateur introuvable
+            }
+
+            const string insertSql = @"
+                INSERT INTO TRANSACTION_FIDELITE (id_utilisateur, id_commerce, points, type_transaction, description)
+                VALUES (@Id, NULL, @Points, @Type, @Motif)";
+            await connection.ExecuteAsync(insertSql,
+                new { Id = idUtilisateur, Points = Math.Abs(montant), Type = type, Motif = motif }, transaction);
+
+            transaction.Commit();
+            return true;
+        }
+        catch
+        {
+            transaction.Rollback();
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Retourne les réservations d'un utilisateur (avec le nom du terrain), les plus récentes d'abord.
+    /// </summary>
+    /// <param name="idUtilisateur">Identifiant de l'utilisateur.</param>
+    /// <returns>Les réservations de l'utilisateur.</returns>
+    public async Task<IEnumerable<ReservationAdminDb>> GetReservationsByUtilisateur(int idUtilisateur)
+    {
+        const string sql = @"
+            SELECT r.id_reservation AS Id, r.date AS Date, r.heure_debut AS HeureDebut,
+                   r.heure_fin AS HeureFin, r.prix_paye AS PrixPaye, t.nom AS Terrain
+            FROM RESERVATION r
+            JOIN TERRAIN t ON t.id_terrain = r.id_terrain
+            WHERE r.id_utilisateur = @Id
+            ORDER BY r.date DESC, r.heure_debut DESC";
+        return await connection.QueryAsync<ReservationAdminDb>(sql, new { Id = idUtilisateur });
+    }
+
+    /// <summary>
+    /// Retourne les horaires de travail d'un utilisateur employé (avec le nom du commerce).
+    /// </summary>
+    /// <param name="idUtilisateur">Identifiant de l'utilisateur.</param>
+    /// <returns>Les horaires de l'utilisateur, vide s'il n'est pas employé.</returns>
+    public async Task<IEnumerable<HoraireAdminDb>> GetHorairesByUtilisateur(int idUtilisateur)
+    {
+        const string sql = @"
+            SELECT h.id_horaire AS Id, h.date AS Date, h.heure_debut AS HeureDebut,
+                   h.heure_fin AS HeureFin, h.heure_payee AS HeurePayee, h.statut AS Statut,
+                   c.nom AS Commerce
+            FROM HORAIRE h
+            JOIN EMPLOYE e ON e.id_employe = h.id_employe
+            JOIN COMMERCE c ON c.id_commerce = h.id_commerce
+            WHERE e.id_utilisateur = @Id
+            ORDER BY h.date DESC, h.heure_debut DESC";
+        return await connection.QueryAsync<HoraireAdminDb>(sql, new { Id = idUtilisateur });
+    }
 }

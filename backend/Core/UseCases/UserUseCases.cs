@@ -99,4 +99,101 @@ public class UserUseCases(IUserGateway userGateway) : IUserUseCases
     /// <param name="id">Identifiant de l'utilisateur (extrait du JWT).</param>
     /// <returns>True si désactivé, false si l'utilisateur est introuvable ou déjà inactif.</returns>
     public Task<bool> DeleteAccount(int id) => userGateway.DeleteAccount(id);
+
+    // ── Administration ────────────────────────────────────────────
+
+    /// <summary>
+    /// Retourne tous les utilisateurs (actifs et bloqués) avec leur rôle, pour l'administration.
+    /// </summary>
+    /// <returns>La liste complète des utilisateurs.</returns>
+    public Task<IEnumerable<UserAdmin>> GetAllForAdmin() => userGateway.GetAllForAdmin();
+
+    /// <summary>
+    /// Change le niveau d'accès d'un utilisateur. Empêche de rétrograder le dernier administrateur actif.
+    /// </summary>
+    /// <param name="id">Identifiant de l'utilisateur ciblé.</param>
+    /// <param name="request">Niveau d'accès cible.</param>
+    /// <exception cref="ValidationException">Si le niveau d'accès est invalide.</exception>
+    /// <exception cref="ConflictException">Si l'opération retirerait le dernier administrateur actif.</exception>
+    public async Task ChangeRole(int id, ChangeRoleRequest request)
+    {
+        var validRoles = new[] { "Client", "Employe", "Cuisine", "Administrateur" };
+        if (string.IsNullOrWhiteSpace(request.Acces) || !validRoles.Contains(request.Acces))
+            throw new ValidationException("Niveau d'accès invalide.");
+
+        // On ne peut pas retirer le rôle Administrateur au dernier admin actif.
+        if (request.Acces != "Administrateur" && await userGateway.IsLastActiveAdmin(id))
+            throw new ConflictException("Impossible de rétrograder le dernier administrateur.");
+
+        await userGateway.ChangeRole(id, request.Acces);
+    }
+
+    /// <summary>
+    /// Ajuste le solde de points d'un utilisateur (RG-03). Motif obligatoire, montant non nul.
+    /// </summary>
+    /// <param name="id">Identifiant de l'utilisateur ciblé.</param>
+    /// <param name="request">Montant signé et motif de l'ajustement.</param>
+    /// <returns>True si appliqué.</returns>
+    /// <exception cref="ValidationException">Si le montant est nul, le motif vide, ou le solde deviendrait négatif.</exception>
+    public async Task<bool> AdjustPoints(int id, AjustementPointsRequest request)
+    {
+        if (request.Montant == 0)
+            throw new ValidationException("Le montant de l'ajustement ne peut pas être nul.");
+        if (string.IsNullOrWhiteSpace(request.Motif))
+            throw new ValidationException("Le motif de l'ajustement est requis.");
+
+        var applied = await userGateway.AdjustPoints(id, request.Montant, request.Motif);
+        if (!applied)
+            throw new ValidationException("Solde de points insuffisant pour cet ajustement.");
+        return true;
+    }
+
+    /// <summary>
+    /// Bloque un compte (empêche la connexion). Empêche de bloquer le dernier administrateur actif.
+    /// </summary>
+    /// <param name="id">Identifiant de l'utilisateur à bloquer.</param>
+    /// <returns>True si bloqué, false si introuvable ou déjà bloqué.</returns>
+    /// <exception cref="ConflictException">Si l'utilisateur est le dernier administrateur actif.</exception>
+    public async Task<bool> Block(int id)
+    {
+        if (await userGateway.IsLastActiveAdmin(id))
+            throw new ConflictException("Impossible de bloquer le dernier administrateur.");
+        return await userGateway.Block(id);
+    }
+
+    /// <summary>
+    /// Débloque un compte (réautorise la connexion).
+    /// </summary>
+    /// <param name="id">Identifiant de l'utilisateur à débloquer.</param>
+    /// <returns>True si débloqué.</returns>
+    public Task<bool> Unblock(int id) => userGateway.Unblock(id);
+
+    /// <summary>
+    /// Supprime (soft-delete) le compte d'un utilisateur par un administrateur :
+    /// annule les réservations futures, désactive l'éventuelle ligne EMPLOYE et le compte.
+    /// Empêche la suppression du dernier administrateur actif.
+    /// </summary>
+    /// <param name="id">Identifiant de l'utilisateur à supprimer.</param>
+    /// <returns>True si supprimé, false si introuvable ou déjà inactif.</returns>
+    /// <exception cref="ConflictException">Si l'utilisateur est le dernier administrateur actif.</exception>
+    public async Task<bool> DeleteByAdmin(int id)
+    {
+        if (await userGateway.IsLastActiveAdmin(id))
+            throw new ConflictException("Impossible de supprimer le dernier administrateur.");
+        return await userGateway.DeleteAccount(id);
+    }
+
+    /// <summary>
+    /// Retourne les réservations d'un utilisateur (vue administrateur).
+    /// </summary>
+    /// <param name="id">Identifiant de l'utilisateur.</param>
+    /// <returns>Les réservations de l'utilisateur.</returns>
+    public Task<IEnumerable<ReservationAdmin>> GetReservations(int id) => userGateway.GetReservations(id);
+
+    /// <summary>
+    /// Retourne les horaires de travail d'un utilisateur employé (vue administrateur).
+    /// </summary>
+    /// <param name="id">Identifiant de l'utilisateur.</param>
+    /// <returns>Les horaires de l'utilisateur.</returns>
+    public Task<IEnumerable<HoraireAdmin>> GetHoraires(int id) => userGateway.GetHoraires(id);
 }

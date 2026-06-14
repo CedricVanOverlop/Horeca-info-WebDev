@@ -1,2 +1,304 @@
 <app-navbar></app-navbar>
-<h1>Gestion des utilisateurs</h1>
+
+<div class="utilisateurs-container">
+
+  <!-- En-tête -->
+  <div class="page-header">
+    <h1 class="page-title">Gestion des utilisateurs</h1>
+    <p class="page-subtitle">Vue d'ensemble de tous les comptes de l'application</p>
+  </div>
+
+  <!-- Cartes statistiques -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <span class="stat-label">Clients</span>
+      <span class="stat-value">{{ stats().clients }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Employés</span>
+      <span class="stat-value">{{ stats().employes }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Cuisine</span>
+      <span class="stat-value">{{ stats().cuisine }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Administrateurs</span>
+      <span class="stat-value">{{ stats().admins }}</span>
+    </div>
+  </div>
+
+  <!-- Onglets par rôle -->
+  <div class="tabs">
+    <button class="tab" [class.tab--active]="activeTab() === 'Client'" (click)="setTab('Client')">
+      Clients <span class="tab-badge tab-badge--client">{{ stats().clients }}</span>
+    </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'Employe'" (click)="setTab('Employe')">
+      Employés <span class="tab-badge tab-badge--employe">{{ stats().employes }}</span>
+    </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'Cuisine'" (click)="setTab('Cuisine')">
+      Cuisine <span class="tab-badge tab-badge--cuisine">{{ stats().cuisine }}</span>
+    </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'Administrateur'" (click)="setTab('Administrateur')">
+      Administrateurs <span class="tab-badge tab-badge--admin">{{ stats().admins }}</span>
+    </button>
+  </div>
+
+  <!-- Barre de recherche -->
+  <div class="search-bar">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Rechercher par nom ou email…"
+      [value]="searchQuery()"
+      (input)="onSearch($any($event.target).value)"
+    />
+    <select
+      class="form-control form-control--select"
+      [value]="filterStatut()"
+      (change)="onFilterStatut($any($event.target).value)"
+    >
+      <option value="">Tous les statuts</option>
+      <option value="actif">Actifs</option>
+      <option value="bloque">Bloqués</option>
+    </select>
+  </div>
+
+  <!-- État chargement -->
+  @if (loading()) {
+    <div class="loading-state">Chargement…</div>
+  }
+
+  <!-- Erreur serveur -->
+  @if (serverError()) {
+    <div class="error-message">{{ serverError() }}</div>
+  }
+
+  <!-- Liste des utilisateurs -->
+  @if (!loading() && !serverError()) {
+    <div class="user-list">
+
+      @for (user of utilisateursFiltres(); track user.id) {
+        <div class="user-card" [class.user-card--blocked]="!user.actif">
+
+          <div class="avatar" [class]="'avatar avatar--' + user.role.toLowerCase()">
+            {{ initiales(user) }}
+          </div>
+
+          <div class="user-info">
+            <p class="user-name">
+              {{ user.nom }} {{ user.prenom }}
+              @if (!user.actif) {
+                <span class="badge-bloque">Bloqué</span>
+              }
+            </p>
+            <p class="user-meta">{{ user.email }}</p>
+          </div>
+
+          <span class="pts-badge">{{ user.pointsSolde }} pts</span>
+
+          <div class="user-actions">
+            <button class="btn-action" title="Modifier le niveau d'accès" (click)="ouvrirModal(user)">🛡️</button>
+            <button class="btn-action" title="Modifier les points de fidélité" (click)="ouvrirModalPoints(user)">⭐</button>
+            <button class="btn-action" title="Voir réservations et horaires" (click)="ouvrirModalDetails(user)">📅</button>
+            @if (user.actif) {
+              <button class="btn-action btn-action--danger" title="Bloquer le compte" (click)="confirmerBlocage(user)">🔒</button>
+            } @else {
+              <button class="btn-action btn-action--success" title="Débloquer le compte" (click)="debloquer(user)">🔓</button>
+            }
+          </div>
+        </div>
+      }
+
+      @if (utilisateursFiltres().length === 0) {
+        <div class="empty-state">Aucun utilisateur trouvé.</div>
+      }
+
+    </div>
+  }
+
+  <!-- ════════════════ MODAL : Rôle ════════════════ -->
+  @if (modalType() === 'role' && modalUser(); as u) {
+    <div class="modal-backdrop" (click)="fermerModal()">
+      <div class="modal modal--sm" (click)="$event.stopPropagation()">
+        <h2 class="modal-title">Niveau d'accès</h2>
+        <p class="modal-subtitle">{{ u.prenom }} {{ u.nom }} — actuellement <strong>{{ roleLabel(u.role) }}</strong></p>
+
+        @if (modalError()) { <div class="error-message">{{ modalError() }}</div> }
+
+        <div class="form-group">
+          <label class="form-label">Nouveau rôle</label>
+          <select class="form-control" [value]="formRole()" (change)="onFormRole($any($event.target).value)">
+            <option value="Client">Client</option>
+            <option value="Employe">Employé</option>
+            <option value="Cuisine">Cuisine</option>
+            <option value="Administrateur">Administrateur</option>
+          </select>
+        </div>
+
+        <!-- Récap des accès du rôle choisi -->
+        <div class="access-box" [class.access-box--changed]="roleAChange()">
+          <p class="access-title">
+            @if (roleAChange()) {
+              Donne le niveau <strong>{{ roleLabel(formRole()) }}</strong> :
+            } @else {
+              Accès actuels ({{ roleLabel(formRole()) }}) :
+            }
+          </p>
+          <ul class="access-list">
+            @for (acces of accesRoleSelectionne(); track acces) {
+              <li>{{ acces }}</li>
+            }
+          </ul>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="fermerModal()" [disabled]="modalSaving()">Annuler</button>
+          <button class="btn-primary" (click)="enregistrerRole()" [disabled]="modalSaving() || !roleAChange()">
+            {{ modalSaving() ? 'Enregistrement…' : 'Appliquer le rôle' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ════════════════ MODAL : Points ════════════════ -->
+  @if (modalType() === 'points' && modalUser(); as u) {
+    <div class="modal-backdrop" (click)="fermerModal()">
+      <div class="modal modal--sm" (click)="$event.stopPropagation()">
+        <h2 class="modal-title">Points de fidélité</h2>
+        <p class="modal-subtitle">{{ u.prenom }} {{ u.nom }} — solde actuel <strong>{{ u.pointsSolde }} pts</strong></p>
+
+        @if (modalError()) { <div class="error-message">{{ modalError() }}</div> }
+
+        <div class="form-group">
+          <label class="form-label">Ajustement (positif = crédit, négatif = débit)</label>
+          <input
+            type="number"
+            class="form-control"
+            placeholder="ex. 50 ou -20"
+            [value]="formPointsAjustement()"
+            (input)="onFormPoints($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Motif</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="ex. Correction erreur caisse"
+            [value]="formMotifAjustement()"
+            (input)="onFormMotif($any($event.target).value)"
+          />
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="fermerModal()" [disabled]="modalSaving()">Annuler</button>
+          <button class="btn-primary" (click)="enregistrerPoints()" [disabled]="modalSaving()">
+            {{ modalSaving() ? 'Enregistrement…' : 'Appliquer l\'ajustement' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ════════════════ MODAL : Blocage / Suppression ════════════════ -->
+  @if (modalType() === 'block' && modalUser(); as u) {
+    <div class="modal-backdrop" (click)="fermerModal()">
+      <div class="modal modal--sm" (click)="$event.stopPropagation()">
+        <h2 class="modal-title">Bloquer ce compte ?</h2>
+        <p class="modal-text">
+          Êtes-vous sûr de vouloir bloquer le compte de
+          <strong>{{ u.prenom }} {{ u.nom }}</strong> ? Il ne pourra plus se connecter.
+        </p>
+
+        @if (modalError()) { <div class="error-message">{{ modalError() }}</div> }
+
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="fermerModal()" [disabled]="modalSaving()">Annuler</button>
+          <button class="btn-danger" (click)="bloquer()" [disabled]="modalSaving()">
+            {{ modalSaving() ? '…' : 'Bloquer' }}
+          </button>
+        </div>
+
+        <div class="danger-zone">
+          <p class="danger-label">Ou définitivement</p>
+          <p class="modal-text modal-text--small">
+            La suppression annule ses réservations futures et désactive son compte (historique conservé).
+          </p>
+          <button class="btn-danger btn-danger--outline" (click)="supprimer()" [disabled]="modalSaving()">
+            Supprimer le compte
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ════════════════ MODAL : Détails ════════════════ -->
+  @if (modalType() === 'details' && modalUser(); as u) {
+    <div class="modal-backdrop" (click)="fermerModal()">
+      <div class="modal modal--lg" (click)="$event.stopPropagation()">
+        <h2 class="modal-title">{{ u.prenom }} {{ u.nom }}</h2>
+        <p class="modal-subtitle">Réservations et horaires</p>
+
+        @if (detailsLoading()) {
+          <div class="loading-state">Chargement…</div>
+        } @else {
+          <div class="details-grid">
+
+            <!-- Colonne Réservations -->
+            <section class="details-col">
+              <div class="details-head details-head--resa">
+                <span class="details-icon">🎾</span>
+                <span class="details-col-title">Réservations</span>
+                <span class="details-count">{{ reservations().length }}</span>
+              </div>
+              @if (reservations().length === 0) {
+                <p class="details-empty">Aucune réservation.</p>
+              } @else {
+                <ul class="details-list">
+                  @for (r of reservations(); track r.id) {
+                    <li class="details-item">
+                      <span class="details-item-date">{{ formatDate(r.date) }}</span>
+                      <span class="details-item-main">{{ r.terrain }}</span>
+                      <span class="details-item-sub">{{ formatHeure(r.heureDebut) }}–{{ formatHeure(r.heureFin) }} · {{ r.prixPaye }} €</span>
+                    </li>
+                  }
+                </ul>
+              }
+            </section>
+
+            <!-- Colonne Horaires -->
+            <section class="details-col">
+              <div class="details-head details-head--horaire">
+                <span class="details-icon">🕒</span>
+                <span class="details-col-title">Horaires</span>
+                <span class="details-count">{{ horaires().length }}</span>
+              </div>
+              @if (horaires().length === 0) {
+                <p class="details-empty">Aucun horaire.</p>
+              } @else {
+                <ul class="details-list">
+                  @for (h of horaires(); track h.id) {
+                    <li class="details-item">
+                      <span class="details-item-date">{{ formatDate(h.date) }}</span>
+                      <span class="details-item-main">{{ h.commerce }}</span>
+                      <span class="details-item-sub">{{ formatHeure(h.heureDebut) }}–{{ formatHeure(h.heureFin) }} · {{ h.statut }}</span>
+                    </li>
+                  }
+                </ul>
+              }
+            </section>
+
+          </div>
+        }
+
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="fermerModal()">Fermer</button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

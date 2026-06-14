@@ -12,4 +12,14 @@ public interface IUserGateway
     Task<bool> UpdateInfos(UpdateUserRequest request);
     Task<bool> UpdatePassword(int id, string ancienMotDePasse, string nouveauMotDePasse);
     Task<bool> DeleteAccount(int id);
+
+    // ── Administration ────────────────────────────────────────────
+    Task<IEnumerable<UserAdmin>> GetAllForAdmin();
+    Task ChangeRole(int id, string acces);
+    Task<bool> IsLastActiveAdmin(int id);
+    Task<bool> AdjustPoints(int id, decimal montant, string motif);
+    Task<bool> Block(int id);
+    Task<bool> Unblock(int id);
+    Task<IEnumerable<ReservationAdmin>> GetReservations(int id);
+    Task<IEnumerable<HoraireAdmin>> GetHoraires(int id);
 }
