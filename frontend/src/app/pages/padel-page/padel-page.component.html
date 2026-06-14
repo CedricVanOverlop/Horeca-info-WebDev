@@ -2,14 +2,14 @@
 
 <div class="padel-container">
   <h2>Terrains de Padel</h2>
-  @if (loading) {
+  @if (loading()) {
     <div>Chargement...</div>
   }
-  @if (error) {
-    <div class="error-message">{{ error }}</div>
+  @if (error()) {
+    <div class="error-message">{{ error() }}</div>
   }
-  @if (!loading && !error) {
-    @for (terrain of terrains; track terrain.id) {
+  @if (!loading() && !error()) {
+    @for (terrain of terrains(); track terrain.id) {
       <div class="terrain-card">
         <h3>{{ terrain.nom }}</h3>
         <p>Type: {{ terrain.type }}</p>

@@ -2,13 +2,13 @@
 
 <div class="fidelite-container">
   <h2>Carte Fidélité</h2>
-  @if (loading) {
+  @if (loading()) {
     <div>Chargement...</div>
   }
-  @if (error) {
-    <div class="error-message">{{ error }}</div>
+  @if (error()) {
+    <div class="error-message">{{ error() }}</div>
   }
-  @if (!loading && !error && carte) {
-    <p>Points: {{ carte.points }}</p>
+  @if (!loading() && !error() && carte()) {
+    <p>Points: {{ carte()?.points }}</p>
   }
 </div>

@@ -2,13 +2,13 @@
 <div class="compte-container">
 
   <!-- ── Chargement ──────────────────────────────────────────── -->
-  @if (isLoading) {
+  @if (isLoading()) {
     <div class="loading-state">
       <span>Chargement du profil…</span>
     </div>
   }
 
-  @if (!isLoading) {
+  @if (!isLoading()) {
 
     <!-- ── En-tête ─────────────────────────────────────────────── -->
     <header class="compte-header">
@@ -19,9 +19,9 @@
         <div class="avatar" aria-hidden="true">{{ initiales }}</div>
 
         <div class="identity-info">
-          <p class="identity-name">{{ profile?.prenom }} {{ profile?.nom }}</p>
+          <p class="identity-name">{{ profile()?.prenom }} {{ profile()?.nom }}</p>
           <p class="identity-meta">
-            {{ profile?.email }}
+            {{ profile()?.email }}
             @if (membreDepuisLabel) {
               <span>&nbsp;·&nbsp;{{ membreDepuisLabel }}</span>
             }
@@ -109,11 +109,11 @@
         </div>
 
         <!-- Feedback -->
-        @if (profileSuccess) {
+        @if (profileSuccess()) {
           <p class="feedback-success" role="status">✓ Modifications enregistrées.</p>
         }
-        @if (profileError) {
-          <p class="feedback-error" role="alert">{{ profileError }}</p>
+        @if (profileError()) {
+          <p class="feedback-error" role="alert">{{ profileError() }}</p>
         }
 
         <!-- Action -->
@@ -121,9 +121,9 @@
           <button
             type="submit"
             class="btn btn-primary"
-            [disabled]="isSubmittingProfile"
+            [disabled]="isSubmittingProfile()"
           >
-            {{ isSubmittingProfile ? 'Enregistrement…' : 'Enregistrer les modifications' }}
+            {{ isSubmittingProfile() ? 'Enregistrement…' : 'Enregistrer les modifications' }}
           </button>
         </div>
 
@@ -195,11 +195,11 @@
         </div>
 
         <!-- Feedback -->
-        @if (passwordSuccess) {
+        @if (passwordSuccess()) {
           <p class="feedback-success" role="status">✓ Mot de passe mis à jour.</p>
         }
-        @if (passwordError) {
-          <p class="feedback-error" role="alert">{{ passwordError }}</p>
+        @if (passwordError()) {
+          <p class="feedback-error" role="alert">{{ passwordError() }}</p>
         }
 
         <!-- Action -->
@@ -207,9 +207,9 @@
           <button
             type="submit"
             class="btn btn-primary"
-            [disabled]="isSubmittingPassword"
+            [disabled]="isSubmittingPassword()"
           >
-            {{ isSubmittingPassword ? 'Mise à jour…' : 'Mettre à jour' }}
+            {{ isSubmittingPassword() ? 'Mise à jour…' : 'Mettre à jour' }}
           </button>
         </div>
 
@@ -234,7 +234,7 @@
       <p class="danger-label">Zone dangereuse</p>
 
       <!-- Bouton principal (avant confirmation) -->
-      @if (!showDeleteConfirm) {
+      @if (!showDeleteConfirm()) {
         <button
           type="button"
           class="action-row action-row--danger"
@@ -247,20 +247,20 @@
       }
 
       <!-- Confirmation inline -->
-      @if (showDeleteConfirm) {
+      @if (showDeleteConfirm()) {
         <div class="delete-confirm">
           <p class="delete-confirm__text">
             Cette action est <strong>irréversible</strong>. Toutes vos données seront supprimées définitivement.
           </p>
-          @if (deleteError) {
-            <p class="feedback-error" role="alert">{{ deleteError }}</p>
+          @if (deleteError()) {
+            <p class="feedback-error" role="alert">{{ deleteError() }}</p>
           }
           <div class="delete-confirm__actions">
             <button
               type="button"
               class="btn btn-ghost"
               (click)="onCancelDelete()"
-              [disabled]="isDeletingAccount"
+              [disabled]="isDeletingAccount()"
             >
               Annuler
             </button>
@@ -268,9 +268,9 @@
               type="button"
               class="btn btn-danger"
               (click)="onConfirmDelete()"
-              [disabled]="isDeletingAccount"
+              [disabled]="isDeletingAccount()"
             >
-              {{ isDeletingAccount ? 'Suppression…' : 'Confirmer la suppression' }}
+              {{ isDeletingAccount() ? 'Suppression…' : 'Confirmer la suppression' }}
             </button>
           </div>
         </div>

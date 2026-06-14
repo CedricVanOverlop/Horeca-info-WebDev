@@ -1,6 +1,5 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Subscription } from 'rxjs';
 import { AuthStateService } from '../../services/auth-state.service';
 import { MenuStateService } from '../../services/menu-state.service';
 import { NAV, NavItem } from '../../nav.config';
@@ -17,24 +16,12 @@ import { Role } from '../../roles';
   templateUrl: './side-menu.component.html',
   styleUrl: './side-menu.component.css'
 })
-export class SideMenuComponent implements OnInit, OnDestroy {
-  /** Vrai si le panneau est ouvert. */
-  isOpen = false;
+export class SideMenuComponent {
+  private readonly menuState = inject(MenuStateService);
+  private readonly authState = inject(AuthStateService);
 
-  private subscription?: Subscription;
-
-  constructor(
-    private menuState: MenuStateService,
-    private authState: AuthStateService
-  ) {}
-
-  ngOnInit(): void {
-    this.subscription = this.menuState.isOpen$.subscribe(open => (this.isOpen = open));
-  }
-
-  ngOnDestroy(): void {
-    this.subscription?.unsubscribe();
-  }
+  /** Signal d'ouverture du panneau, partagé via le MenuStateService. */
+  readonly isOpen = this.menuState.isOpen;
 
   /** Vrai si un token valide est présent. */
   get isLoggedIn(): boolean {

@@ -1,5 +1,4 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
 
 /** Onglet commerce actuellement sélectionné sur la home page. */
 export type CommerceTab = 'friterie' | 'glaces' | 'padel';
@@ -12,16 +11,16 @@ export type CommerceTab = 'friterie' | 'glaces' | 'padel';
   providedIn: 'root'
 })
 export class TabStateService {
-  private readonly _activeTab = new BehaviorSubject<CommerceTab>('friterie');
+  private readonly _activeTab = signal<CommerceTab>('friterie');
 
-  /** Flux observable de l'onglet commerce actif. */
-  public readonly activeTab$: Observable<CommerceTab> = this._activeTab.asObservable();
+  /** Signal en lecture seule de l'onglet commerce actif. */
+  public readonly activeTab = this._activeTab.asReadonly();
 
   /**
    * Sélectionne l'onglet commerce actif.
    * @param tab Onglet à activer
    */
   public setTab(tab: CommerceTab): void {
-    this._activeTab.next(tab);
+    this._activeTab.set(tab);
   }
 }

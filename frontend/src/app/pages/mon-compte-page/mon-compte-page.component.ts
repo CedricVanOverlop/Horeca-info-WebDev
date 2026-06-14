@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -35,6 +35,9 @@ const passwordMatchValidator: ValidatorFn = (group: AbstractControl): Validation
  *  3. Changement de mot de passe
  *  4. Se déconnecter
  *  5. Zone dangereuse — Supprimer mon compte (confirmation modale inline)
+ *
+ * L'état affiché est porté par des signals : en zoneless, ils déclenchent
+ * automatiquement le rafraîchissement de la vue après les callbacks async.
  */
 @Component({
   selector: 'app-compte-page',
@@ -46,35 +49,34 @@ const passwordMatchValidator: ValidatorFn = (group: AbstractControl): Validation
 export class MonComptePageComponent implements OnInit {
   // ── État général ──────────────────────────────────────────────
   /** Profil chargé depuis l'API */
-  profile: UserProfile | null = null;
+  readonly profile = signal<UserProfile | null>(null);
   /** Chargement initial */
-  isLoading = true;
+  readonly isLoading = signal(true);
 
   // ── Formulaires ───────────────────────────────────────────────
   profileForm!: FormGroup;
   passwordForm!: FormGroup;
 
   // ── Feedback UI ───────────────────────────────────────────────
-  profileSuccess = false;
-  profileError = '';
-  passwordSuccess = false;
-  passwordError = '';
+  readonly profileSuccess = signal(false);
+  readonly profileError = signal('');
+  readonly passwordSuccess = signal(false);
+  readonly passwordError = signal('');
 
   /** Affiche la confirmation de suppression */
-  showDeleteConfirm = false;
-  deleteError = '';
+  readonly showDeleteConfirm = signal(false);
+  readonly deleteError = signal('');
 
   // ── Soumissions en cours ──────────────────────────────────────
-  isSubmittingProfile = false;
-  isSubmittingPassword = false;
-  isDeletingAccount = false;
+  readonly isSubmittingProfile = signal(false);
+  readonly isSubmittingPassword = signal(false);
+  readonly isDeletingAccount = signal(false);
 
   constructor(
     private fb: FormBuilder,
     private usersService: UsersService,
     private authStateService: AuthStateService,
-    private router: Router,
-    private cdr: ChangeDetectorRef
+    private router: Router
   ) {}
 
   // ─────────────────────────────────────────────────────────────
@@ -115,10 +117,10 @@ export class MonComptePageComponent implements OnInit {
   // ─────────────────────────────────────────────────────────────
 
   private _loadProfile(): void {
-    this.isLoading = true;
+    this.isLoading.set(true);
     this.usersService.getMyProfile().subscribe({
       next: (profile) => {
-        this.profile = profile;
+        this.profile.set(profile);
         // Préremplissage du formulaire avec les données reçues
         this.profileForm.patchValue({
           nom:       profile.nom,
@@ -126,13 +128,11 @@ export class MonComptePageComponent implements OnInit {
           email:     profile.email,
           telephone: profile.telephone ?? '',
         });
-        this.isLoading = false;
-        this.cdr.markForCheck();
+        this.isLoading.set(false);
       },
       error: () => {
-        this.profileError = 'Impossible de charger le profil. Veuillez réessayer.';
-        this.isLoading = false;
-        this.cdr.markForCheck();
+        this.profileError.set('Impossible de charger le profil. Veuillez réessayer.');
+        this.isLoading.set(false);
       },
     });
   }
@@ -146,9 +146,10 @@ export class MonComptePageComponent implements OnInit {
    * Ex. : "Nicolas Pirson" → "NP"
    */
   get initiales(): string {
-    if (!this.profile) return '?';
-    const n = this.profile.nom?.charAt(0).toUpperCase() ?? '';
-    const p = this.profile.prenom?.charAt(0).toUpperCase() ?? '';
+    const profile = this.profile();
+    if (!profile) return '?';
+    const n = profile.nom?.charAt(0).toUpperCase() ?? '';
+    const p = profile.prenom?.charAt(0).toUpperCase() ?? '';
     return `${n}${p}`;
   }
 
@@ -157,8 +158,9 @@ export class MonComptePageComponent implements OnInit {
    * Ex. : 2025-01-15 → "Membre depuis janvier 2025"
    */
   get membreDepuisLabel(): string {
-    if (!this.profile?.membreDepuis) return '';
-    const date = new Date(this.profile.membreDepuis);
+    const membreDepuis = this.profile()?.membreDepuis;
+    if (!membreDepuis) return '';
+    const date = new Date(membreDepuis);
     return `Membre depuis ${date.toLocaleDateString('fr-BE', { month: 'long', year: 'numeric' })}`;
   }
 
@@ -168,30 +170,29 @@ export class MonComptePageComponent implements OnInit {
 
   /** Soumet les modifications du profil (Nom, Prénom, Email, Téléphone). */
   onSubmitProfile(): void {
-    this.profileSuccess = false;
-    this.profileError   = '';
+    this.profileSuccess.set(false);
+    this.profileError.set('');
 
     if (this.profileForm.invalid) {
       this.profileForm.markAllAsTouched();
       return;
     }
 
-    this.isSubmittingProfile = true;
+    this.isSubmittingProfile.set(true);
 
     this.usersService.updateMyProfile(this.profileForm.value).subscribe({
       next: () => {
-        this.profileSuccess = true;
-        this.isSubmittingProfile = false;
+        this.profileSuccess.set(true);
+        this.isSubmittingProfile.set(false);
         // Met à jour le profil local affiché dans l'avatar
-        if (this.profile) {
-          this.profile = { ...this.profile, ...this.profileForm.value };
+        const current = this.profile();
+        if (current) {
+          this.profile.set({ ...current, ...this.profileForm.value });
         }
-        this.cdr.markForCheck();
       },
       error: (err) => {
-        this.profileError = err?.error?.message ?? 'Erreur lors de la mise à jour du profil.';
-        this.isSubmittingProfile = false;
-        this.cdr.markForCheck();
+        this.profileError.set(err?.error?.message ?? 'Erreur lors de la mise à jour du profil.');
+        this.isSubmittingProfile.set(false);
       },
     });
   }
@@ -202,27 +203,25 @@ export class MonComptePageComponent implements OnInit {
 
   /** Soumet le changement de mot de passe. */
   onSubmitPassword(): void {
-    this.passwordSuccess = false;
-    this.passwordError   = '';
+    this.passwordSuccess.set(false);
+    this.passwordError.set('');
 
     if (this.passwordForm.invalid) {
       this.passwordForm.markAllAsTouched();
       return;
     }
 
-    this.isSubmittingPassword = true;
+    this.isSubmittingPassword.set(true);
 
     this.usersService.changeMyPassword(this.passwordForm.value).subscribe({
       next: () => {
-        this.passwordSuccess = true;
+        this.passwordSuccess.set(true);
         this.passwordForm.reset();
-        this.isSubmittingPassword = false;
-        this.cdr.markForCheck();
+        this.isSubmittingPassword.set(false);
       },
       error: (err) => {
-        this.passwordError = err?.error?.message ?? 'Erreur lors du changement de mot de passe.';
-        this.isSubmittingPassword = false;
-        this.cdr.markForCheck();
+        this.passwordError.set(err?.error?.message ?? 'Erreur lors du changement de mot de passe.');
+        this.isSubmittingPassword.set(false);
       },
     });
   }
@@ -242,14 +241,14 @@ export class MonComptePageComponent implements OnInit {
 
   /** Affiche la confirmation de suppression. */
   onRequestDelete(): void {
-    this.showDeleteConfirm = true;
-    this.deleteError = '';
+    this.showDeleteConfirm.set(true);
+    this.deleteError.set('');
   }
 
   /** Annule la suppression. */
   onCancelDelete(): void {
-    this.showDeleteConfirm = false;
-    this.deleteError = '';
+    this.showDeleteConfirm.set(false);
+    this.deleteError.set('');
   }
 
   /**
@@ -257,18 +256,17 @@ export class MonComptePageComponent implements OnInit {
    * Après suppression, déconnecte et redirige vers /login.
    */
   onConfirmDelete(): void {
-    this.isDeletingAccount = true;
-    this.deleteError = '';
+    this.isDeletingAccount.set(true);
+    this.deleteError.set('');
 
     this.usersService.deleteMyAccount().subscribe({
       next: () => {
-        this.isDeletingAccount = false;
+        this.isDeletingAccount.set(false);
         this.authStateService.logout(); // Nettoie le token et redirige
       },
       error: (err) => {
-        this.deleteError = err?.error?.message ?? 'Erreur lors de la suppression du compte.';
-        this.isDeletingAccount = false;
-        this.cdr.markForCheck();
+        this.deleteError.set(err?.error?.message ?? 'Erreur lors de la suppression du compte.');
+        this.isDeletingAccount.set(false);
       },
     });
   }

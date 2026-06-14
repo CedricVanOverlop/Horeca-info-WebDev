@@ -1,4 +1,4 @@
-<aside class="side-menu" [class.open]="isOpen">
+<aside class="side-menu" [class.open]="isOpen()">
   <!-- Déconnecté : invitation à se connecter -->
   @if (!isLoggedIn) {
     <div class="side-menu-message">

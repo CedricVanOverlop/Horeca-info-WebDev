@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { PadelService } from '../../services/api/padel.service';
 import { Terrain } from '../../services/api/models/terrain.model';
 import { AuthStateService } from '../../services/auth-state.service';
@@ -11,9 +11,9 @@ import { NavbarComponent } from '../../components/navbar/navbar.component';
   styleUrl: './padel-page.component.css'
 })
 export class PadelPageComponent implements OnInit {
-  terrains: Terrain[] = [];
-  error: string = '';
-  loading: boolean = false;
+  readonly terrains = signal<Terrain[]>([]);
+  readonly error = signal('');
+  readonly loading = signal(false);
 
   constructor(
     private padelService: PadelService,
@@ -21,20 +21,20 @@ export class PadelPageComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loading = true;
+    this.loading.set(true);
     this.padelService.getTerrains().subscribe({
       next: terrains => {
-        this.terrains = terrains;
-        this.loading = false;
+        this.terrains.set(terrains);
+        this.loading.set(false);
       },
       error: err => {
         if (err.status === 401) {
-          this.error = 'Session expirée. Veuillez vous reconnecter.';
+          this.error.set('Session expirée. Veuillez vous reconnecter.');
           this.authStateService.logout();
         } else {
-          this.error = 'Erreur lors du chargement des terrains.';
+          this.error.set('Erreur lors du chargement des terrains.');
         }
-        this.loading = false;
+        this.loading.set(false);
       }
     });
   }

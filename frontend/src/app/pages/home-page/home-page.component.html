@@ -3,21 +3,21 @@
     <button
       type="button"
       class="tab"
-      [class.active]="activeTab === 'friterie'"
+      [class.active]="activeTab() === 'friterie'"
       (click)="selectTab('friterie')">
       Friterie.net
     </button>
     <button
       type="button"
       class="tab"
-      [class.active]="activeTab === 'glaces'"
+      [class.active]="activeTab() === 'glaces'"
       (click)="selectTab('glaces')">
       Baraque à Glaces
     </button>
     <button
       type="button"
       class="tab"
-      [class.active]="activeTab === 'padel'"
+      [class.active]="activeTab() === 'padel'"
       (click)="selectTab('padel')">
       Padel Lobbes
     </button>
@@ -25,11 +25,11 @@
 </app-navbar>
 
 <div class="home-container">
-  @if (activeTab === 'friterie') {
+  @if (activeTab() === 'friterie') {
     <app-friterie-card></app-friterie-card>
-  } @else if (activeTab === 'glaces') {
+  } @else if (activeTab() === 'glaces') {
     <app-glaces-card></app-glaces-card>
-  } @else if (activeTab === 'padel') {
+  } @else if (activeTab() === 'padel') {
     <app-padel-card></app-padel-card>
   }
 </div>

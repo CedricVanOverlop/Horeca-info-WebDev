@@ -1,5 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Component, inject } from '@angular/core';
 import { CommerceTab, TabStateService } from '../../services/tab-state.service';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FriterieCardComponent } from '../../components/friterie-card/friterie-card.component';
@@ -22,21 +21,11 @@ import { PadelCardComponent } from '../../components/padel-card/padel-card.compo
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.css'
 })
-export class HomePageComponent implements OnInit, OnDestroy {
-  /** Onglet commerce actif (Friterie.net par défaut). */
-  activeTab: CommerceTab = 'friterie';
+export class HomePageComponent {
+  private readonly tabState = inject(TabStateService);
 
-  private subscription?: Subscription;
-
-  constructor(private tabState: TabStateService) {}
-
-  ngOnInit(): void {
-    this.subscription = this.tabState.activeTab$.subscribe(tab => (this.activeTab = tab));
-  }
-
-  ngOnDestroy(): void {
-    this.subscription?.unsubscribe();
-  }
+  /** Onglet commerce actif, partagé via le TabStateService (signal lecture seule). */
+  readonly activeTab = this.tabState.activeTab;
 
   /**
    * Active l'onglet commerce sélectionné.

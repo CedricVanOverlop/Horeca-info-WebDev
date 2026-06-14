@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { FideliteService } from '../../services/api/fidelite.service';
-import { CarteFidelite, Transaction } from '../../services/api/models/carte-fidelite.model';
+import { CarteFidelite } from '../../services/api/models/carte-fidelite.model';
 import { AuthStateService } from '../../services/auth-state.service';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 
@@ -11,10 +11,9 @@ import { NavbarComponent } from '../../components/navbar/navbar.component';
   styleUrl: './fidelite-page.component.css'
 })
 export class FidelitePageComponent implements OnInit {
-  carte: CarteFidelite | null = null;
-  transactions: Transaction[] = [];
-  error: string = '';
-  loading: boolean = false;
+  readonly carte = signal<CarteFidelite | null>(null);
+  readonly error = signal('');
+  readonly loading = signal(false);
 
   constructor(
     private fideliteService: FideliteService,
@@ -22,20 +21,20 @@ export class FidelitePageComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loading = true;
+    this.loading.set(true);
     this.fideliteService.getCarte().subscribe({
       next: carte => {
-        this.carte = carte;
-        this.loading = false;
+        this.carte.set(carte);
+        this.loading.set(false);
       },
       error: err => {
         if (err.status === 401) {
-          this.error = 'Session expirée. Veuillez vous reconnecter.';
+          this.error.set('Session expirée. Veuillez vous reconnecter.');
           this.authStateService.logout();
         } else {
-          this.error = 'Erreur lors du chargement de la carte fidélité.';
+          this.error.set('Erreur lors du chargement de la carte fidélité.');
         }
-        this.loading = false;
+        this.loading.set(false);
       }
     });
   }
