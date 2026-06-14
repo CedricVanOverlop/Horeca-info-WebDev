@@ -43,6 +43,13 @@ public class UserUseCases(IUserGateway userGateway) : IUserUseCases
     public Task<IEnumerable<User>> GetAll() => userGateway.GetAll();
 
     /// <summary>
+    /// Retourne le profil de l'utilisateur identifié par le token.
+    /// </summary>
+    /// <param name="id">Identifiant de l'utilisateur (extrait du JWT).</param>
+    /// <returns>Le profil, ou null si l'utilisateur est introuvable ou désactivé.</returns>
+    public Task<User?> GetProfile(int id) => userGateway.GetProfile(id);
+
+    /// <summary>
     /// Met à jour les informations personnelles de l'utilisateur identifié par le token.
     /// </summary>
     /// <param name="id">Identifiant de l'utilisateur (extrait du JWT, jamais du body).</param>

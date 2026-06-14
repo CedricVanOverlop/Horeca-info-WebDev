@@ -24,6 +24,20 @@ public class UserRepository(IDbConnection connection) : IUserRepository
     }
 
     /// <summary>
+    /// Recherche un utilisateur actif par son identifiant. Retourne null si introuvable ou désactivé.
+    /// </summary>
+    /// <param name="id">Identifiant de l'utilisateur.</param>
+    /// <returns>L'utilisateur correspondant (sans le hash du mot de passe), ou null.</returns>
+    public async Task<UserDb?> FindById(int id)
+    {
+        const string sql = @"
+            SELECT id_utilisateur AS Id, nom AS Nom, prenom AS Prenom, email AS Email,
+                   telephone AS Telephone, points_solde AS PointsSolde, actif AS Actif
+            FROM UTILISATEUR WHERE id_utilisateur = @Id AND actif = TRUE LIMIT 1";
+        return await connection.QueryFirstOrDefaultAsync<UserDb>(sql, new { Id = id });
+    }
+
+    /// <summary>
     /// Insère un nouvel utilisateur avec le mot de passe déjà hashé en BCrypt.
     /// </summary>
     /// <param name="request">Données d'inscription.</param>

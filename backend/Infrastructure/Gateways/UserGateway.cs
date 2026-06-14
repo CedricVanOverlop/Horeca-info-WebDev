@@ -142,6 +142,32 @@ public class UserGateway(
     }
 
     /// <summary>
+    /// Retourne le profil de l'utilisateur actif identifié par son id, rôle staff résolu
+    /// (Client si la ligne EMPLOYE est absente ou inactive).
+    /// </summary>
+    /// <param name="id">Identifiant de l'utilisateur.</param>
+    /// <returns>Le profil, ou null si l'utilisateur est introuvable ou désactivé.</returns>
+    public async Task<User?> GetProfile(int id)
+    {
+        var userDb = await userRepository.FindById(id);
+        if (userDb is null) return null;
+
+        var employeDb = await employeRepository.FindByIdUtilisateur(userDb.Id);
+        var role = (employeDb is not null && employeDb.Actif) ? employeDb.Acces : "Client";
+
+        return new User
+        {
+            Id          = userDb.Id,
+            Nom         = userDb.Nom,
+            Prenom      = userDb.Prenom,
+            Email       = userDb.Email,
+            Telephone   = userDb.Telephone,
+            PointsSolde = userDb.PointsSolde,
+            Role        = role
+        };
+    }
+
+    /// <summary>
     /// Met à jour les informations personnelles d'un utilisateur (nom, prénom, email, téléphone).
     /// </summary>
     /// <param name="request">Nouvelles données de l'utilisateur, identifié par son Id.</param>

@@ -1,2 +1,275 @@
-<app-navbar></app-navbar>
-<h1>Mon compte</h1>
+<!-- =========================================================
+     Page : Mon compte
+     Chemin : pages/compte-page/compte-page.component.html
+     ========================================================= -->
+
+<div class="compte-container">
+
+  <!-- ── Chargement ──────────────────────────────────────────── -->
+  <div *ngIf="isLoading" class="loading-state">
+    <span>Chargement du profil…</span>
+  </div>
+
+  <ng-container *ngIf="!isLoading">
+
+    <!-- ── En-tête ─────────────────────────────────────────────── -->
+    <header class="compte-header">
+      <h1 class="compte-title">Mon compte</h1>
+
+      <div class="compte-identity">
+        <!-- Avatar initiales -->
+        <div class="avatar" aria-hidden="true">{{ initiales }}</div>
+
+        <div class="identity-info">
+          <p class="identity-name">{{ profile?.prenom }} {{ profile?.nom }}</p>
+          <p class="identity-meta">
+            {{ profile?.email }}&nbsp;·&nbsp;{{ membreDepuisLabel }}
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── Section : Informations personnelles ─────────────────── -->
+    <section class="compte-card">
+      <h2 class="card-title">Informations personnelles</h2>
+
+      <form [formGroup]="profileForm" (ngSubmit)="onSubmitProfile()" novalidate>
+
+        <!-- Nom / Prénom en ligne -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="nom">Nom</label>
+            <input
+              id="nom"
+              type="text"
+              class="form-control"
+              [class.is-invalid]="nom?.invalid && nom?.touched"
+              formControlName="nom"
+              placeholder="Nom"
+              autocomplete="family-name"
+            />
+            <small *ngIf="nom?.hasError('required') && nom?.touched" class="error-msg">
+              Le nom est requis.
+            </small>
+          </div>
+
+          <div class="form-group">
+            <label for="prenom">Prénom</label>
+            <input
+              id="prenom"
+              type="text"
+              class="form-control"
+              [class.is-invalid]="prenom?.invalid && prenom?.touched"
+              formControlName="prenom"
+              placeholder="Prénom"
+              autocomplete="given-name"
+            />
+            <small *ngIf="prenom?.hasError('required') && prenom?.touched" class="error-msg">
+              Le prénom est requis.
+            </small>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            class="form-control"
+            [class.is-invalid]="email?.invalid && email?.touched"
+            formControlName="email"
+            placeholder="nom.prenom@email.com"
+            autocomplete="email"
+          />
+          <small *ngIf="email?.hasError('required') && email?.touched" class="error-msg">
+            L'email est requis.
+          </small>
+          <small *ngIf="email?.hasError('email') && email?.touched" class="error-msg">
+            Format d'email invalide.
+          </small>
+        </div>
+
+        <!-- Téléphone -->
+        <div class="form-group">
+          <label for="telephone">Téléphone</label>
+          <input
+            id="telephone"
+            type="tel"
+            class="form-control"
+            [class.is-invalid]="telephone?.invalid && telephone?.touched"
+            formControlName="telephone"
+            placeholder="+32 470 00 00 00"
+            autocomplete="tel"
+          />
+          <small *ngIf="telephone?.hasError('pattern') && telephone?.touched" class="error-msg">
+            Format de téléphone invalide.
+          </small>
+        </div>
+
+        <!-- Feedback -->
+        <p *ngIf="profileSuccess" class="feedback-success" role="status">
+          ✓ Modifications enregistrées.
+        </p>
+        <p *ngIf="profileError" class="feedback-error" role="alert">
+          {{ profileError }}
+        </p>
+
+        <!-- Action -->
+        <div class="form-actions">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="isSubmittingProfile"
+          >
+            {{ isSubmittingProfile ? 'Enregistrement…' : 'Enregistrer les modifications' }}
+          </button>
+        </div>
+
+      </form>
+    </section>
+
+    <!-- ── Section : Changer le mot de passe ───────────────────── -->
+    <section class="compte-card">
+      <h2 class="card-title">Changer le mot de passe</h2>
+
+      <form [formGroup]="passwordForm" (ngSubmit)="onSubmitPassword()" novalidate>
+
+        <!-- Mot de passe actuel -->
+        <div class="form-group">
+          <label for="motDePasseActuel">Mot de passe actuel</label>
+          <input
+            id="motDePasseActuel"
+            type="password"
+            class="form-control"
+            [class.is-invalid]="motDePasseActuel?.invalid && motDePasseActuel?.touched"
+            formControlName="motDePasseActuel"
+            autocomplete="current-password"
+          />
+          <small *ngIf="motDePasseActuel?.hasError('required') && motDePasseActuel?.touched" class="error-msg">
+            Le mot de passe actuel est requis.
+          </small>
+        </div>
+
+        <!-- Nouveau / Confirmer en ligne -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="nouveauMotDePasse">Nouveau mot de passe</label>
+            <input
+              id="nouveauMotDePasse"
+              type="password"
+              class="form-control"
+              [class.is-invalid]="nouveauMotDePasse?.invalid && nouveauMotDePasse?.touched"
+              formControlName="nouveauMotDePasse"
+              autocomplete="new-password"
+            />
+            <small *ngIf="nouveauMotDePasse?.hasError('required') && nouveauMotDePasse?.touched" class="error-msg">
+              Le nouveau mot de passe est requis.
+            </small>
+            <small *ngIf="nouveauMotDePasse?.hasError('minlength') && nouveauMotDePasse?.touched" class="error-msg">
+              Minimum 8 caractères.
+            </small>
+          </div>
+
+          <div class="form-group">
+            <label for="confirmerMotDePasse">Confirmer le mot de passe</label>
+            <input
+              id="confirmerMotDePasse"
+              type="password"
+              class="form-control"
+              [class.is-invalid]="
+                (confirmerMotDePasse?.touched && confirmerMotDePasse?.hasError('required'))
+                || (passwordForm.hasError('passwordMismatch') && confirmerMotDePasse?.touched)
+              "
+              formControlName="confirmerMotDePasse"
+              autocomplete="new-password"
+            />
+            <small *ngIf="confirmerMotDePasse?.hasError('required') && confirmerMotDePasse?.touched" class="error-msg">
+              La confirmation est requise.
+            </small>
+            <small *ngIf="passwordForm.hasError('passwordMismatch') && confirmerMotDePasse?.touched" class="error-msg">
+              Les mots de passe ne correspondent pas.
+            </small>
+          </div>
+        </div>
+
+        <!-- Feedback -->
+        <p *ngIf="passwordSuccess" class="feedback-success" role="status">
+          ✓ Mot de passe mis à jour.
+        </p>
+        <p *ngIf="passwordError" class="feedback-error" role="alert">
+          {{ passwordError }}
+        </p>
+
+        <!-- Action -->
+        <div class="form-actions">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="isSubmittingPassword"
+          >
+            {{ isSubmittingPassword ? 'Mise à jour…' : 'Mettre à jour' }}
+          </button>
+        </div>
+
+      </form>
+    </section>
+
+    <!-- ── Section : Se déconnecter ────────────────────────────── -->
+    <section class="compte-card compte-card--action">
+      <button
+        type="button"
+        class="action-row"
+        (click)="onLogout()"
+        aria-label="Se déconnecter"
+      >
+        <span>Se déconnecter</span>
+        <span class="action-chevron" aria-hidden="true">›</span>
+      </button>
+    </section>
+
+    <!-- ── Zone dangereuse ─────────────────────────────────────── -->
+    <section class="compte-card compte-card--danger">
+      <p class="danger-label">Zone dangereuse</p>
+
+      <!-- Bouton principal (avant confirmation) -->
+      <button
+        *ngIf="!showDeleteConfirm"
+        type="button"
+        class="action-row action-row--danger"
+        (click)="onRequestDelete()"
+        aria-label="Supprimer mon compte"
+      >
+        <span>Supprimer mon compte</span>
+        <span class="action-chevron" aria-hidden="true">›</span>
+      </button>
+
+      <!-- Confirmation inline -->
+      <div *ngIf="showDeleteConfirm" class="delete-confirm">
+        <p class="delete-confirm__text">
+          Cette action est <strong>irréversible</strong>. Toutes vos données seront supprimées définitivement.
+        </p>
+        <p *ngIf="deleteError" class="feedback-error" role="alert">{{ deleteError }}</p>
+        <div class="delete-confirm__actions">
+          <button
+            type="button"
+            class="btn btn-ghost"
+            (click)="onCancelDelete()"
+            [disabled]="isDeletingAccount"
+          >
+            Annuler
+          </button>
+          <button
+            type="button"
+            class="btn btn-danger"
+            (click)="onConfirmDelete()"
+            [disabled]="isDeletingAccount"
+          >
+            {{ isDeletingAccount ? 'Suppression…' : 'Confirmer la suppression' }}
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </ng-container>
+</div>

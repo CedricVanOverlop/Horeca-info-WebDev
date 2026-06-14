@@ -1,0 +1,292 @@
+/* =========================================================
+   Page : Mon compte
+   Chemin : pages/compte-page/compte-page.component.css
+   Palette cohérente avec login-page et register-page
+   ========================================================= */
+
+/* ── Layout général ──────────────────────────────────────── */
+.compte-container {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+}
+
+/* ── État chargement ─────────────────────────────────────── */
+.loading-state {
+  text-align: center;
+  padding: 4rem 0;
+  color: #777;
+  font-size: 0.95rem;
+}
+
+/* ── En-tête ─────────────────────────────────────────────── */
+.compte-header {
+  margin-bottom: 1.75rem;
+}
+
+.compte-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 1.25rem;
+}
+
+.compte-identity {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Avatar cercle noir avec initiales blanches */
+.avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background-color: #1a1a1a;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+  user-select: none;
+}
+
+.identity-name {
+  margin: 0 0 0.2rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.identity-meta {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+/* ── Cartes sections ─────────────────────────────────────── */
+.compte-card {
+  background-color: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.card-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 1.25rem;
+}
+
+/* Carte action neutre (déconnexion) */
+.compte-card--action {
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Carte zone dangereuse */
+.compte-card--danger {
+  border-color: #f5c6c6;
+  background-color: #fff5f5;
+  padding: 0;
+  overflow: hidden;
+}
+
+.danger-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #c0392b;
+  margin: 0;
+  padding: 0.9rem 1.25rem 0.5rem;
+}
+
+/* ── Lignes action (Se déconnecter / Supprimer) ──────────── */
+.action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1rem 1.25rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #1a1a1a;
+  text-align: left;
+  transition: background-color 0.15s ease;
+}
+
+.action-row:hover {
+  background-color: #f7f7f7;
+}
+
+.action-row--danger {
+  color: #c0392b;
+}
+
+.action-row--danger:hover {
+  background-color: #fdecea;
+}
+
+.action-chevron {
+  font-size: 1.2rem;
+  color: #aaa;
+  line-height: 1;
+}
+
+/* ── Formulaires ─────────────────────────────────────────── */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 520px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-group {
+  margin-bottom: 1.1rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 0.35rem;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  color: #1a1a1a;
+  background-color: #fff;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-control:focus {
+  border-color: #1a1a1a;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.08);
+}
+
+.form-control.is-invalid {
+  border-color: #dc3545;
+}
+
+.form-control.is-invalid:focus {
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.12);
+}
+
+/* ── Messages d'erreur inline ────────────────────────────── */
+.error-msg {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.78rem;
+  color: #dc3545;
+}
+
+/* ── Feedback formulaire ─────────────────────────────────── */
+.feedback-success {
+  font-size: 0.85rem;
+  color: #1e7e34;
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 5px;
+  padding: 0.55rem 0.85rem;
+  margin-bottom: 0.75rem;
+}
+
+.feedback-error {
+  font-size: 0.85rem;
+  color: #721c24;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 5px;
+  padding: 0.55rem 0.85rem;
+  margin-bottom: 0.75rem;
+}
+
+/* ── Actions formulaire ──────────────────────────────────── */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+/* ── Boutons ─────────────────────────────────────────────── */
+.btn {
+  padding: 0.6rem 1.25rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Primaire — noir */
+.btn-primary {
+  background-color: #1a1a1a;
+  color: #fff;
+}
+
+.btn-primary:not(:disabled):hover {
+  background-color: #333;
+}
+
+/* Fantôme — bordure seule */
+.btn-ghost {
+  background-color: transparent;
+  color: #555;
+  border: 1px solid #ccc;
+}
+
+.btn-ghost:not(:disabled):hover {
+  background-color: #f0f0f0;
+}
+
+/* Danger — rouge */
+.btn-danger {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.btn-danger:not(:disabled):hover {
+  background-color: #b02a37;
+}
+
+/* ── Confirmation suppression ────────────────────────────── */
+.delete-confirm {
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+.delete-confirm__text {
+  font-size: 0.88rem;
+  color: #555;
+  margin: 0 0 1rem;
+  line-height: 1.5;
+}
+
+.delete-confirm__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}

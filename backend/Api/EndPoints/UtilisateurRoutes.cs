@@ -31,6 +31,15 @@ public static class UtilisateurRoutes
             return Results.Ok(users);
         }).RequireAuthorization("AdminOnly");
 
+        group.MapGet("/me", async (ClaimsPrincipal principal, IUserUseCases useCases) =>
+        {
+            var id = GetUserId(principal);
+            if (id is null) return Results.Unauthorized();
+
+            var profile = await useCases.GetProfile(id.Value);
+            return profile is null ? Results.NotFound() : Results.Ok(profile);
+        }).RequireAuthorization();
+
         group.MapPut("/me", async ([FromBody] UpdateUserRequest request, ClaimsPrincipal principal, IUserUseCases useCases) =>
         {
             var id = GetUserId(principal);
