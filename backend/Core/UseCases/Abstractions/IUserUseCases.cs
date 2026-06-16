@@ -20,6 +20,4 @@ public interface IUserUseCases
     Task<bool> Block(int id);
     Task<bool> Unblock(int id);
     Task<bool> DeleteByAdmin(int id);
-    Task<IEnumerable<ReservationAdmin>> GetReservations(int id);
-    Task<IEnumerable<HoraireAdmin>> GetHoraires(int id);
 }

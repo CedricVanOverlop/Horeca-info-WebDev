@@ -35,6 +35,25 @@ public class ReservationGateway(IReservationRepository reservationRepository) : 
 
     public Task Delete(string id) => reservationRepository.Delete(id);
 
+    /// <summary>
+    /// Retourne les réservations d'un utilisateur, vue administrateur (avec le nom du terrain).
+    /// </summary>
+    /// <param name="idUtilisateur">Identifiant de l'utilisateur.</param>
+    /// <returns>Les réservations de l'utilisateur.</returns>
+    public async Task<IEnumerable<ReservationAdmin>> GetAdminByUtilisateur(int idUtilisateur)
+    {
+        var dbs = await reservationRepository.GetAdminByUtilisateur(idUtilisateur);
+        return dbs.Select(db => new ReservationAdmin
+        {
+            Id         = db.Id,
+            Date       = db.Date,
+            HeureDebut = db.HeureDebut,
+            HeureFin   = db.HeureFin,
+            PrixPaye   = db.PrixPaye,
+            Terrain    = db.Terrain
+        });
+    }
+
     private static Reservation Map(ReservationDb db) => new()
     {
         Id = db.Id, UserId = db.UserId, TerrainId = db.TerrainId,

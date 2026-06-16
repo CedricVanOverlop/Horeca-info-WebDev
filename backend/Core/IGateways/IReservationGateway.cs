@@ -8,4 +8,5 @@ public interface IReservationGateway
     Task<IEnumerable<Reservation>> GetByUserId(int userId);
     Task<Reservation> Create(Reservation reservation);
     Task Delete(string id);
+    Task<IEnumerable<ReservationAdmin>> GetAdminByUtilisateur(int idUtilisateur);
 }

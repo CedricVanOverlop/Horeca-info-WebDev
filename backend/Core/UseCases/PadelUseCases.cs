@@ -10,4 +10,12 @@ public class PadelUseCases(ITerrainGateway terrainGateway, IReservationGateway r
     public Task<IEnumerable<Reservation>> GetReservations(int userId) => reservationGateway.GetByUserId(userId);
     public Task<Reservation> CreateReservation(Reservation reservation) => reservationGateway.Create(reservation);
     public Task DeleteReservation(string id) => reservationGateway.Delete(id);
+
+    /// <summary>
+    /// Retourne les réservations d'un utilisateur, vue administrateur.
+    /// </summary>
+    /// <param name="userId">Identifiant de l'utilisateur.</param>
+    /// <returns>Les réservations de l'utilisateur.</returns>
+    public Task<IEnumerable<ReservationAdmin>> GetReservationsAdmin(int userId) =>
+        reservationGateway.GetAdminByUtilisateur(userId);
 }

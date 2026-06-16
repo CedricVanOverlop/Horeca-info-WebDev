@@ -332,43 +332,4 @@ public class UserGateway(
         var rows = await userRepository.Reactivate(id);
         return rows > 0;
     }
-
-    /// <summary>
-    /// Retourne les réservations d'un utilisateur, vue administrateur.
-    /// </summary>
-    /// <param name="id">Identifiant de l'utilisateur.</param>
-    /// <returns>Les réservations de l'utilisateur.</returns>
-    public async Task<IEnumerable<ReservationAdmin>> GetReservations(int id)
-    {
-        var dbs = await userRepository.GetReservationsByUtilisateur(id);
-        return dbs.Select(db => new ReservationAdmin
-        {
-            Id         = db.Id,
-            Date       = db.Date,
-            HeureDebut = db.HeureDebut,
-            HeureFin   = db.HeureFin,
-            PrixPaye   = db.PrixPaye,
-            Terrain    = db.Terrain
-        });
-    }
-
-    /// <summary>
-    /// Retourne les horaires de travail d'un utilisateur employé, vue administrateur.
-    /// </summary>
-    /// <param name="id">Identifiant de l'utilisateur.</param>
-    /// <returns>Les horaires de l'utilisateur.</returns>
-    public async Task<IEnumerable<HoraireAdmin>> GetHoraires(int id)
-    {
-        var dbs = await userRepository.GetHorairesByUtilisateur(id);
-        return dbs.Select(db => new HoraireAdmin
-        {
-            Id         = db.Id,
-            Date       = db.Date,
-            HeureDebut = db.HeureDebut,
-            HeureFin   = db.HeureFin,
-            HeurePayee = db.HeurePayee,
-            Statut     = db.Statut,
-            Commerce   = db.Commerce
-        });
-    }
 }

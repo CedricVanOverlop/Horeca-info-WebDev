@@ -23,6 +23,4 @@ public interface IUserRepository
     Task<int> CountActiveAdmins();
     Task<bool> IsActiveAdmin(int idUtilisateur);
     Task<bool> AdjustPoints(int idUtilisateur, decimal montant, string type, string motif);
-    Task<IEnumerable<ReservationAdminDb>> GetReservationsByUtilisateur(int idUtilisateur);
-    Task<IEnumerable<HoraireAdminDb>> GetHorairesByUtilisateur(int idUtilisateur);
 }

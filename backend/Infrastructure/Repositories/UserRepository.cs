@@ -288,40 +288,4 @@ public class UserRepository(IDbConnection connection) : IUserRepository
             throw;
         }
     }
-
-    /// <summary>
-    /// Retourne les réservations d'un utilisateur (avec le nom du terrain), les plus récentes d'abord.
-    /// </summary>
-    /// <param name="idUtilisateur">Identifiant de l'utilisateur.</param>
-    /// <returns>Les réservations de l'utilisateur.</returns>
-    public async Task<IEnumerable<ReservationAdminDb>> GetReservationsByUtilisateur(int idUtilisateur)
-    {
-        const string sql = @"
-            SELECT r.id_reservation AS Id, r.date AS Date, r.heure_debut AS HeureDebut,
-                   r.heure_fin AS HeureFin, r.prix_paye AS PrixPaye, t.nom AS Terrain
-            FROM RESERVATION r
-            JOIN TERRAIN t ON t.id_terrain = r.id_terrain
-            WHERE r.id_utilisateur = @Id
-            ORDER BY r.date DESC, r.heure_debut DESC";
-        return await connection.QueryAsync<ReservationAdminDb>(sql, new { Id = idUtilisateur });
-    }
-
-    /// <summary>
-    /// Retourne les horaires de travail d'un utilisateur employé (avec le nom du commerce).
-    /// </summary>
-    /// <param name="idUtilisateur">Identifiant de l'utilisateur.</param>
-    /// <returns>Les horaires de l'utilisateur, vide s'il n'est pas employé.</returns>
-    public async Task<IEnumerable<HoraireAdminDb>> GetHorairesByUtilisateur(int idUtilisateur)
-    {
-        const string sql = @"
-            SELECT h.id_horaire AS Id, h.date AS Date, h.heure_debut AS HeureDebut,
-                   h.heure_fin AS HeureFin, h.heure_payee AS HeurePayee, h.statut AS Statut,
-                   c.nom AS Commerce
-            FROM HORAIRE h
-            JOIN EMPLOYE e ON e.id_employe = h.id_employe
-            JOIN COMMERCE c ON c.id_commerce = h.id_commerce
-            WHERE e.id_utilisateur = @Id
-            ORDER BY h.date DESC, h.heure_debut DESC";
-        return await connection.QueryAsync<HoraireAdminDb>(sql, new { Id = idUtilisateur });
-    }
 }

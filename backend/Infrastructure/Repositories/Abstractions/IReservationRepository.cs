@@ -9,4 +9,5 @@ public interface IReservationRepository
     Task<string> Create(ReservationDb reservation);
     Task Delete(string id);
     Task<int> DeleteFutureByUserId(int userId);
+    Task<IEnumerable<ReservationAdminDb>> GetAdminByUtilisateur(int idUtilisateur);
 }

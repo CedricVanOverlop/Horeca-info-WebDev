@@ -8,4 +8,5 @@ public interface IPadelUseCases
     Task<IEnumerable<Reservation>> GetReservations(int userId);
     Task<Reservation> CreateReservation(Reservation reservation);
     Task DeleteReservation(string id);
+    Task<IEnumerable<ReservationAdmin>> GetReservationsAdmin(int userId);
 }

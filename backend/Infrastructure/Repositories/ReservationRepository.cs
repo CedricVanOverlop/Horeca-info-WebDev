@@ -39,4 +39,22 @@ public class ReservationRepository(IDbConnection connection) : IReservationRepos
         const string sql = "DELETE FROM Reservations WHERE UserId = @UserId AND DateDebut > NOW()";
         return await connection.ExecuteAsync(sql, new { UserId = userId });
     }
+
+    /// <summary>
+    /// Retourne les réservations d'un utilisateur (avec le nom du terrain), les plus récentes d'abord.
+    /// Vue administrateur.
+    /// </summary>
+    /// <param name="idUtilisateur">Identifiant de l'utilisateur.</param>
+    /// <returns>Les réservations de l'utilisateur.</returns>
+    public async Task<IEnumerable<ReservationAdminDb>> GetAdminByUtilisateur(int idUtilisateur)
+    {
+        const string sql = @"
+            SELECT r.id_reservation AS Id, r.date AS Date, r.heure_debut AS HeureDebut,
+                   r.heure_fin AS HeureFin, r.prix_paye AS PrixPaye, t.nom AS Terrain
+            FROM RESERVATION r
+            JOIN TERRAIN t ON t.id_terrain = r.id_terrain
+            WHERE r.id_utilisateur = @Id
+            ORDER BY r.date DESC, r.heure_debut DESC";
+        return await connection.QueryAsync<ReservationAdminDb>(sql, new { Id = idUtilisateur });
+    }
 }

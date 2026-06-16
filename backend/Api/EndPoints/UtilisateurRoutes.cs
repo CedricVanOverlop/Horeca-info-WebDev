@@ -105,15 +105,15 @@ public static class UtilisateurRoutes
             return deleted ? Results.NoContent() : Results.NotFound();
         }).RequireAuthorization("AdminOnly");
 
-        group.MapGet("/{id:int}/reservations", async (int id, IUserUseCases useCases) =>
+        group.MapGet("/{id:int}/reservations", async (int id, IPadelUseCases padelUseCases) =>
         {
-            var reservations = await useCases.GetReservations(id);
+            var reservations = await padelUseCases.GetReservationsAdmin(id);
             return Results.Ok(reservations);
         }).RequireAuthorization("AdminOnly");
 
-        group.MapGet("/{id:int}/horaires", async (int id, IUserUseCases useCases) =>
+        group.MapGet("/{id:int}/horaires", async (int id, IPlanningUseCases planningUseCases) =>
         {
-            var horaires = await useCases.GetHoraires(id);
+            var horaires = await planningUseCases.GetHorairesAdmin(id);
             return Results.Ok(horaires);
         }).RequireAuthorization("AdminOnly");
     }

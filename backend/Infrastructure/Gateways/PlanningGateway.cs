@@ -28,6 +28,27 @@ public class PlanningGateway(IPlanningRepository planningRepository) : IPlanning
 
     public Task Delete(string id) => planningRepository.Delete(id);
 
+    /// <summary>
+    /// Retourne les horaires de travail d'un utilisateur employé, vue administrateur
+    /// (avec le nom du commerce).
+    /// </summary>
+    /// <param name="idUtilisateur">Identifiant de l'utilisateur.</param>
+    /// <returns>Les horaires de l'utilisateur.</returns>
+    public async Task<IEnumerable<HoraireAdmin>> GetHorairesByUtilisateur(int idUtilisateur)
+    {
+        var dbs = await planningRepository.GetHorairesByUtilisateur(idUtilisateur);
+        return dbs.Select(db => new HoraireAdmin
+        {
+            Id         = db.Id,
+            Date       = db.Date,
+            HeureDebut = db.HeureDebut,
+            HeureFin   = db.HeureFin,
+            HeurePayee = db.HeurePayee,
+            Statut     = db.Statut,
+            Commerce   = db.Commerce
+        });
+    }
+
     private static Planning Map(PlanningDb db) => new()
     { Id = db.Id, EmployeId = db.EmployeId, DateDebut = db.DateDebut, DateFin = db.DateFin };
 }

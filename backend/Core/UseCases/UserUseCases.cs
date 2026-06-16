@@ -182,18 +182,4 @@ public class UserUseCases(IUserGateway userGateway) : IUserUseCases
             throw new ConflictException("Impossible de supprimer le dernier administrateur.");
         return await userGateway.DeleteAccount(id);
     }
-
-    /// <summary>
-    /// Retourne les réservations d'un utilisateur (vue administrateur).
-    /// </summary>
-    /// <param name="id">Identifiant de l'utilisateur.</param>
-    /// <returns>Les réservations de l'utilisateur.</returns>
-    public Task<IEnumerable<ReservationAdmin>> GetReservations(int id) => userGateway.GetReservations(id);
-
-    /// <summary>
-    /// Retourne les horaires de travail d'un utilisateur employé (vue administrateur).
-    /// </summary>
-    /// <param name="id">Identifiant de l'utilisateur.</param>
-    /// <returns>Les horaires de l'utilisateur.</returns>
-    public Task<IEnumerable<HoraireAdmin>> GetHoraires(int id) => userGateway.GetHoraires(id);
 }
