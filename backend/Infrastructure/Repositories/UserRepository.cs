@@ -64,6 +64,25 @@ public class UserRepository(IDbConnection connection) : IUserRepository
     }
 
     /// <summary>
+    /// Recherche les utilisateurs actifs dont le nom, le prénom ou l'email contient le terme donné.
+    /// Limité à 20 résultats. Le mot de passe n'est jamais retourné.
+    /// </summary>
+    /// <param name="query">Terme de recherche (déjà nettoyé par le UseCase).</param>
+    /// <returns>Les utilisateurs correspondants.</returns>
+    public async Task<IEnumerable<UserDb>> Search(string query)
+    {
+        const string sql = @"
+            SELECT id_utilisateur AS Id, nom AS Nom, prenom AS Prenom, email AS Email,
+                   telephone AS Telephone, points_solde AS PointsSolde, actif AS Actif
+            FROM UTILISATEUR
+            WHERE actif = TRUE
+              AND (nom LIKE @Like OR prenom LIKE @Like OR email LIKE @Like)
+            ORDER BY nom, prenom
+            LIMIT 20";
+        return await connection.QueryAsync<UserDb>(sql, new { Like = $"%{query}%" });
+    }
+
+    /// <summary>
     /// Insère un nouvel utilisateur avec le mot de passe déjà hashé en BCrypt.
     /// </summary>
     /// <param name="request">Données d'inscription.</param>

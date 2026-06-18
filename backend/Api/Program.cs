@@ -75,7 +75,6 @@ app.UseAuthorization();
 
 app.MapUtilisateurRoutes();
 app.MapFideliteRoutes();
-app.MapOdooRoutes();
 app.MapPadelRoutes();
 app.MapPersonnelRoutes();
 app.MapPlanningRoutes();

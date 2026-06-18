@@ -1,0 +1,70 @@
+@if (terrainError()) { <div class="error-message">{{ terrainError() }}</div> }
+
+<div class="terrain-grid">
+  @for (t of terrains(); track t.id) {
+    <div class="card terrain-card" [class.terrain-card--inactif]="!t.disponible">
+      @if (editTerrainId() === t.id) {
+        <div class="form-group">
+          <label class="form-label">Nom</label>
+          <input type="text" class="form-control" [value]="etNom()" (input)="etNom.set($any($event.target).value)" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Ouverture</label>
+            <input type="time" step="1800" class="form-control" [value]="etOuverture()" (input)="etOuverture.set($any($event.target).value)" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fermeture</label>
+            <input type="time" step="1800" class="form-control" [value]="etFermeture()" (input)="etFermeture.set($any($event.target).value)" />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-secondary btn-sm" (click)="annulerEditionTerrain()" [disabled]="etSaving()">Annuler</button>
+          <button class="btn-primary btn-sm" (click)="enregistrerTerrain()" [disabled]="etSaving()">
+            {{ etSaving() ? '…' : 'Enregistrer' }}
+          </button>
+        </div>
+      } @else {
+        <div class="terrain-head">
+          <span class="terrain-nom">{{ t.nom }}</span>
+          <button class="toggle" [class.toggle--on]="t.disponible" (click)="basculerActif(t)" [attr.aria-label]="t.disponible ? 'Désactiver' : 'Activer'">
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
+        <p class="terrain-statut" [class.terrain-statut--off]="!t.disponible">
+          {{ t.disponible ? 'Actif — réservable' : 'Inactif — non réservable' }}
+        </p>
+        <p class="terrain-horaire">{{ formatHeure(t.heureOuverture) }} – {{ formatHeure(t.heureFermeture) }}</p>
+        @if (estAdmin) {
+          <button class="btn-secondary btn-sm" (click)="editerTerrain(t)">Modifier</button>
+        }
+      }
+    </div>
+  }
+</div>
+
+@if (estAdmin) {
+  <div class="card form-card">
+    <h3 class="card-title">Ajouter un terrain</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Nom</label>
+        <input type="text" class="form-control" placeholder="Terrain 4 — Couvert"
+          [value]="nouveauNom()" (input)="nouveauNom.set($any($event.target).value)" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ouverture</label>
+        <input type="time" class="form-control" [value]="nouvelleOuverture()" (input)="nouvelleOuverture.set($any($event.target).value)" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Fermeture</label>
+        <input type="time" class="form-control" [value]="nouvelleFermeture()" (input)="nouvelleFermeture.set($any($event.target).value)" />
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-primary" (click)="creerTerrain()" [disabled]="terrainSaving()">
+        {{ terrainSaving() ? 'Création…' : 'Ajouter le terrain' }}
+      </button>
+    </div>
+  </div>
+}

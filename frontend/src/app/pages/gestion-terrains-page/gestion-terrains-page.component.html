@@ -1,2 +1,28 @@
-<app-navbar></app-navbar>
-<h1>Gestion Terrains</h1>
+<app-navbar>
+  <!-- Onglets projetés dans la navbar -->
+  <div class="tabs">
+    <button class="tab" [class.tab--active]="onglet() === 'reserver'" (click)="changerOnglet('reserver')">Réserver</button>
+    <button class="tab" [class.tab--active]="onglet() === 'terrains'" (click)="changerOnglet('terrains')">Terrains</button>
+    <button class="tab" [class.tab--active]="onglet() === 'reservations'" (click)="changerOnglet('reservations')">Réservations</button>
+    @if (estAdmin) {
+      <button class="tab" [class.tab--active]="onglet() === 'tarifs'" (click)="changerOnglet('tarifs')">Tarifs</button>
+    }
+  </div>
+</app-navbar>
+
+<div class="gestion-container">
+
+  <div class="page-header">
+    <h1 class="page-title">Gestion des terrains</h1>
+  </div>
+
+  @switch (onglet()) {
+    @case ('reserver') { <app-reserver-card /> }
+    @case ('terrains') { <app-terrains-card /> }
+    @case ('reservations') { <app-reservations-card /> }
+    @case ('tarifs') {
+      @if (estAdmin) { <app-tarifs-card /> }
+    }
+  }
+
+</div>

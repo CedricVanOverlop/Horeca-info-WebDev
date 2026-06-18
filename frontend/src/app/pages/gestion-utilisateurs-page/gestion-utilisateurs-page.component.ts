@@ -7,6 +7,7 @@ import {
   ReservationAdmin,
   HoraireAdmin,
 } from '../../services/api/models/utilisateur-admin.model';
+import { formatHeure, formatDate } from '../../shared/format.util';
 
 /** Filtre de statut appliqué à la liste. */
 type FiltreStatut = '' | 'actif' | 'bloque';
@@ -143,14 +144,8 @@ export class GestionUtilisateursPageComponent implements OnInit {
     return role === 'Employe' ? 'Employé' : role;
   }
 
-  formatDate(iso: string): string {
-    const d = new Date(iso);
-    return isNaN(d.getTime()) ? '—' : d.toLocaleDateString('fr-BE');
-  }
-
-  formatHeure(heure: string): string {
-    return heure ? heure.slice(0, 5) : '';
-  }
+  readonly formatDate = formatDate;
+  readonly formatHeure = formatHeure;
 
   // ─────────────────────────────────────────────────────────────
   // Ouverture / fermeture des modals

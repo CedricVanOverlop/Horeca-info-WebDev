@@ -9,6 +9,13 @@ public interface IUserGateway
     Task<IEnumerable<User>> GetAll();
     Task<User?> GetProfile(int id);
     Task<bool> IsActive(int id);
+
+    /// <summary>
+    /// Recherche des utilisateurs actifs par nom, prénom ou email (réservation manuelle
+    /// par le personnel : la réservation est toujours liée à un compte existant).
+    /// </summary>
+    /// <param name="query">Terme de recherche (nom, prénom ou email).</param>
+    Task<IEnumerable<User>> Search(string query);
     Task<bool> UpdateInfos(UpdateUserRequest request);
     Task<bool> UpdatePassword(int id, string ancienMotDePasse, string nouveauMotDePasse);
     Task<bool> DeleteAccount(int id);

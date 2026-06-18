@@ -1,0 +1,87 @@
+:host { display: block; }
+
+/* ── Base partagée ──────────────────────────────────────── */
+.card { background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 18px; }
+.form-card { margin-bottom: 16px; }
+.card-title { margin: 0 0 14px; font-size: 1.05rem; color: #222; }
+.form-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.form-row .form-group { flex: 1; min-width: 140px; }
+.form-group { margin-bottom: 14px; }
+.form-group--grow { flex: 2; }
+.form-label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: #555; font-weight: 600; }
+.form-control {
+  border: 1px solid #e5e5e5; border-radius: 6px; padding: 9px 12px; font-size: 0.95rem;
+  background: #fff; color: #222; width: 100%; box-sizing: border-box; font-family: inherit;
+}
+.form-control:focus { outline: none; border-color: #333; }
+.form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 4px; }
+.banner {
+  background: #faf3e0; border: 1px solid #e8d8a8; color: #7a5b1d;
+  border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.9rem;
+}
+.error-message {
+  background: #fdecea; border: 1px solid #f5c6cb; color: #c0392b;
+  border-radius: 6px; padding: 10px 14px; margin-bottom: 12px;
+}
+.success-message {
+  background: #e7f5ec; border: 1px solid #b6e0c4; color: #1f7a45;
+  border-radius: 6px; padding: 10px 14px; margin-bottom: 12px;
+}
+.hint { margin: -8px 0 8px; color: #7a5b1d; font-style: italic; font-size: 0.85rem; }
+.btn-primary {
+  background: #333; color: #fff; border: none; border-radius: 6px; padding: 9px 18px; cursor: pointer; font-size: 0.95rem;
+}
+.btn-primary:hover { background: #222; }
+.btn-secondary {
+  background: #fff; color: #555; border: 1px solid #e5e5e5; border-radius: 6px; padding: 9px 18px; cursor: pointer; font-size: 0.95rem;
+}
+.btn-secondary:hover { background: #f5f5f5; }
+.btn-sm { padding: 6px 12px; font-size: 0.85rem; }
+.btn-primary:disabled, .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Palette de tarifs (pinceaux) ───────────────────────── */
+.palette { display: flex; gap: 8px; flex-wrap: wrap; }
+.brush {
+  display: inline-flex; align-items: center; gap: 8px; background: #fff;
+  border: 2px solid #e5e5e5; border-radius: 999px; padding: 6px 14px;
+  cursor: pointer; font-size: 0.88rem; color: #333;
+}
+.brush:hover { background: #f7f7f7; }
+.brush--active { box-shadow: 0 0 0 3px rgba(0,0,0,0.08); font-weight: 600; }
+.brush--gomme { border-color: #ccc; }
+.brush-pastille { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+.brush-wrap { display: inline-flex; align-items: stretch; }
+.brush-wrap .brush { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.brush-edit {
+  border: 2px solid #e5e5e5; border-left: none; border-radius: 0 999px 999px 0;
+  background: #fff; padding: 0 12px; cursor: pointer; color: #666; font-size: 0.9rem;
+}
+.brush-edit:hover { background: #f0f0f0; color: #222; }
+.brush--edit {
+  display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px;
+}
+.brush-input { width: 120px; padding: 5px 8px; font-size: 0.85rem; }
+.brush-input--prix { width: 64px; }
+
+/* ── Planning hebdomadaire peignable ────────────────────── */
+.planning {
+  display: grid; grid-template-columns: 48px repeat(7, 1fr); gap: 2px;
+  margin-top: 8px; user-select: none; background: #e5e5e5;
+  border: 1px solid #e5e5e5; border-radius: 8px; overflow: hidden;
+}
+.planning--peindre .pl-case { cursor: pointer; }
+.pl-coin { background: #fafafa; }
+.pl-entete {
+  background: #222; color: #fff; text-align: center; font-weight: 700;
+  font-size: 0.8rem; padding: 8px 0;
+}
+.pl-heure {
+  background: #fafafa; text-align: right; padding: 0 8px; font-size: 0.75rem;
+  color: #888; display: flex; align-items: center; justify-content: flex-end;
+}
+.pl-case {
+  background: #fff; min-height: 34px; display: flex; align-items: center;
+  justify-content: center; transition: background 0.1s;
+}
+.pl-case--vide:hover { background: #f0f0f0; }
+.pl-case-prix { font-size: 0.72rem; font-weight: 700; color: rgba(0,0,0,0.6); }

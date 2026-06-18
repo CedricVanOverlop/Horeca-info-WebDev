@@ -30,7 +30,6 @@ public static class ServiceCollectionExtension
         services.AddScoped<IUserGateway, UserGateway>();
         services.AddScoped<IEmployeGateway, EmployeGateway>();
         services.AddScoped<IFideliteGateway, FideliteGateway>();
-        services.AddScoped<IOdooGateway, OdooGateway>();
         services.AddScoped<IPlanningGateway, PlanningGateway>();
         services.AddScoped<IReservationGateway, ReservationGateway>();
         services.AddScoped<ITerrainGateway, TerrainGateway>();

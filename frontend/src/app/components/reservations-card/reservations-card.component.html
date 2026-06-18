@@ -1,0 +1,41 @@
+<div class="banner">📋 Toutes les réservations. Le personnel peut annuler n'importe quelle réservation, y compris celles des clients.</div>
+
+@if (resaError()) { <div class="error-message">{{ resaError() }}</div> }
+
+<div class="form-group">
+  <label class="form-label">Filtrer par terrain</label>
+  <select class="form-control" [value]="resaFiltreTerrain()" (change)="resaFiltreTerrain.set($any($event.target).value)">
+    <option value="">Tous les terrains</option>
+    @for (t of terrains(); track t.id) {
+      <option [value]="t.nom">{{ t.nom }}</option>
+    }
+  </select>
+</div>
+
+@if (resaLoading()) {
+  <div class="loading-state">Chargement…</div>
+} @else if (reservationsFiltrees().length === 0) {
+  <p class="empty-state">Aucune réservation.</p>
+} @else {
+  <div class="resa-list">
+    @for (r of reservationsFiltrees(); track r.id) {
+      <div class="card resa-row" [class.resa-row--passee]="!estAVenir(r)">
+        <div class="resa-main">
+          <span class="resa-date">{{ formatDate(r.date) }}</span>
+          <span class="resa-plage">{{ formatHeure(r.heureDebut) }} – {{ formatHeure(r.heureFin) }}</span>
+          <span class="resa-terrain">{{ r.terrain }}</span>
+          @if (estAVenir(r)) { <span class="badge badge--avenir">À venir</span> }
+          @else { <span class="badge badge--passee">Passée</span> }
+        </div>
+        <div class="resa-meta">
+          <span class="resa-client">{{ r.client }} · {{ r.clientEmail }}</span>
+          <span class="resa-prix">{{ r.prixPaye }} € · {{ r.moyenPaiement === 'EnLigne' ? '💳 En ligne' : '🏠 Sur place' }}</span>
+          @if (r.remarques) { <span class="resa-remarque">📝 {{ r.remarques }}</span> }
+        </div>
+        <div class="resa-actions">
+          <button class="btn-danger btn-danger--outline btn-sm" (click)="annulerResa(r)">Annuler</button>
+        </div>
+      </div>
+    }
+  </div>
+}

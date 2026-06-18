@@ -7,6 +7,7 @@ public interface IUserRepository
 {
     Task<UserDb?> FindByEmail(string email);
     Task<UserDb?> FindById(int id);
+    Task<IEnumerable<UserDb>> Search(string query);
     Task<string?> GetPasswordHash(int id);
     Task<bool> IsActive(int id);
     Task<int> Create(RegisterRequest request, string hashedPassword);

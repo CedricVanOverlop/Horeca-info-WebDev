@@ -151,17 +151,25 @@ CREATE TABLE HORAIRE (
 -- Rôle  : Terrains de padel réservables. Un terrain inactif
 --         (travaux, maintenance) n'est plus proposé à la
 --         réservation mais conserve son historique.
+--         heure_ouverture / heure_fermeture : bornes de la
+--         plage réservable, identiques tous les jours. Servent
+--         aussi au bouton front "tarif par défaut" (génère des
+--         lignes TARIF couvrant l'ouverture sur les 7 jours).
 -- =============================================================
 CREATE TABLE TERRAIN (
-    id_terrain  INT          NOT NULL AUTO_INCREMENT,
-    nom         VARCHAR(100) NOT NULL,  -- Inclut le type : "Terrain 1 — Couvert"
-    actif       BOOLEAN      NOT NULL DEFAULT TRUE,
-    id_commerce INT          NOT NULL,
+    id_terrain      INT          NOT NULL AUTO_INCREMENT,
+    nom             VARCHAR(100) NOT NULL,  -- Inclut le type : "Terrain 1 — Couvert"
+    actif           BOOLEAN      NOT NULL DEFAULT TRUE,
+    heure_ouverture TIME         NOT NULL,  -- Début de la plage réservable
+    heure_fermeture TIME         NOT NULL,  -- Fin de la plage réservable
+    id_commerce     INT          NOT NULL,
 
     CONSTRAINT pk_terrain PRIMARY KEY (id_terrain),
     CONSTRAINT fk_terrain_commerce
         FOREIGN KEY (id_commerce)
-        REFERENCES COMMERCE(id_commerce)
+        REFERENCES COMMERCE(id_commerce),
+    CONSTRAINT chk_terrain_ouverture
+        CHECK (heure_fermeture > heure_ouverture)
 );
 
 
@@ -191,7 +199,9 @@ CREATE TABLE TARIF (
     CONSTRAINT chk_tarif_prix
         CHECK (prix_heure > 0),
 
-    INDEX idx_tarif_terrain (id_terrain)
+    INDEX idx_tarif_terrain (id_terrain),
+    -- Index composite pour le contrôle de chevauchement (même terrain + même jour)
+    INDEX idx_tarif_terrain_jour (id_terrain, jour_semaine)
 );
 
 
@@ -203,6 +213,9 @@ CREATE TABLE TARIF (
 --         Il reste exact même si les tarifs évoluent ensuite.
 --         La vérification de chevauchement se fait dans une
 --         transaction atomique côté backend (voir Use Cases).
+--         moyen_paiement est purement informatif (pas de
+--         paiement réel) : 'EnLigne' ou 'SurPlace'.
+--         L'annulation est un DELETE physique (pas de statut).
 -- =============================================================
 CREATE TABLE RESERVATION (
     id_reservation   INT           NOT NULL AUTO_INCREMENT,
@@ -211,6 +224,8 @@ CREATE TABLE RESERVATION (
     heure_fin        TIME          NOT NULL,
     date_reservation DATETIME      NOT NULL DEFAULT NOW(),
     prix_paye        DECIMAL(10,2) NOT NULL,
+    moyen_paiement   VARCHAR(20)   NOT NULL,  -- Informatif : 'EnLigne' | 'SurPlace'
+    remarques        VARCHAR(255)  NULL,      -- Note libre (ex: blocage maintenance/événement saisi par cuisine/admin)
     id_terrain       INT           NOT NULL,
     id_utilisateur   INT           NOT NULL,
     id_tarif         INT           NOT NULL,
@@ -229,11 +244,15 @@ CREATE TABLE RESERVATION (
         CHECK (heure_fin > heure_debut),
     CONSTRAINT chk_resa_prix
         CHECK (prix_paye >= 0),
+    CONSTRAINT chk_resa_moyen_paiement
+        CHECK (moyen_paiement IN ('EnLigne', 'SurPlace')),
 
     INDEX idx_resa_terrain       (id_terrain),
     INDEX idx_resa_utilisateur   (id_utilisateur),
-    -- Index composite pour accélérer la détection de chevauchements
-    INDEX idx_resa_terrain_date  (id_terrain, date)
+    -- Index composite pour accélérer la détection de chevauchements (terrain)
+    INDEX idx_resa_terrain_date  (id_terrain, date),
+    -- Index composite : règle anti-double-réservation client (tous terrains, même créneau)
+    INDEX idx_resa_user_date     (id_utilisateur, date)
 );
 
 

@@ -1,0 +1,121 @@
+<div class="banner">🎨 Crée un tarif, sélectionne-le, puis peins les créneaux (clic ou glissé). Gomme pour libérer. <strong>Sans pinceau actif, clique un créneau peint pour modifier son prix/libellé pour ce jour seul</strong> (fonctionne même avec des réservations).</div>
+
+@if (tarifError()) { <div class="error-message">{{ tarifError() }}</div> }
+@if (tarifSuccess()) { <div class="success-message">{{ tarifSuccess() }}</div> }
+
+<!-- Palette de tarifs -->
+<div class="card form-card">
+  <h3 class="card-title">Palette de tarifs</h3>
+  <div class="palette">
+    @for (m of palette(); track m.cle) {
+      @if (editionModele() === m.cle) {
+        <div class="brush brush--edit" [style.borderColor]="m.couleur">
+          <span class="brush-pastille" [style.background]="m.couleur"></span>
+          <input type="text" class="form-control brush-input" placeholder="Libellé"
+            [value]="emLibelle()" (input)="emLibelle.set($any($event.target).value)" />
+          <input type="number" class="form-control brush-input brush-input--prix" placeholder="€/h"
+            [value]="emPrix()" (input)="emPrix.set($any($event.target).valueAsNumber)" />
+          <button type="button" class="btn-primary btn-sm" (click)="enregistrerModele()" [disabled]="modeleSaving()">✓</button>
+          <button type="button" class="btn-secondary btn-sm" (click)="annulerEditionModele()" [disabled]="modeleSaving()">✕</button>
+        </div>
+      } @else {
+        <span class="brush-wrap">
+          <button type="button" class="brush" [class.brush--active]="outil() === m.cle"
+            [style.borderColor]="m.couleur" (click)="choisirOutil(m.cle)">
+            <span class="brush-pastille" [style.background]="m.couleur"></span>
+            {{ m.libelle }} — {{ m.prix }} €/h
+          </button>
+          <button type="button" class="brush-edit" (click)="editerModele(m)" title="Modifier prix / libellé">✎</button>
+        </span>
+      }
+    }
+    <button type="button" class="brush brush--gomme" [class.brush--active]="outil() === 'gomme'"
+      (click)="choisirOutil('gomme')">🧽 Gomme</button>
+  </div>
+
+  <div class="form-row" style="margin-top:14px">
+    <div class="form-group form-group--grow">
+      <label class="form-label">Nouveau tarif — libellé</label>
+      <input type="text" class="form-control" placeholder="Soirée semaine"
+        [value]="nmLibelle()" (input)="nmLibelle.set($any($event.target).value)" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Prix / h (€)</label>
+      <input type="number" class="form-control" placeholder="20"
+        [value]="nmPrix()" (input)="nmPrix.set($any($event.target).valueAsNumber)" />
+    </div>
+    <div class="form-group" style="display:flex;align-items:flex-end">
+      <button class="btn-secondary" (click)="ajouterModele()">+ Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sélection du terrain affiché -->
+<div class="form-row">
+  <div class="form-group form-group--grow">
+    <label class="form-label">Planning du terrain</label>
+    <select class="form-control" [value]="planningTerrainId()" (change)="chargerPlanning($any($event.target).value)">
+      @for (t of terrains(); track t.id) {
+        <option [value]="t.id">{{ t.nom }}</option>
+      }
+    </select>
+  </div>
+</div>
+
+<!-- Planning hebdomadaire peignable -->
+<div class="planning" [class.planning--peindre]="outil()">
+  <div class="pl-coin"></div>
+  @for (j of jours; track j.valeur) {
+    <div class="pl-entete">{{ j.label }}</div>
+  }
+  @for (h of heures(); track h) {
+    <div class="pl-heure">{{ h }}h</div>
+    @for (j of jours; track j.valeur) {
+      <div class="pl-case"
+        [class.pl-case--vide]="!cellule(j.valeur, h)"
+        [style.background]="couleurCase(j.valeur, h)"
+        (mousedown)="debutPeinture(j.valeur, h)"
+        (mouseenter)="surviolPeinture(j.valeur, h)"
+        [title]="modeleParCle(cellule(j.valeur, h)?.cle ?? null)?.libelle ?? ''">
+        @if (cellule(j.valeur, h); as c) {
+          <span class="pl-case-prix">{{ modeleParCle(c.cle)?.prix }}€</span>
+        }
+      </div>
+    }
+  }
+</div>
+
+<!-- Éditeur d'un créneau (un jour précis) -->
+@if (cellEdit(); as ce) {
+  @if (tarifParId(ce.id); as t) {
+    <div class="card form-card" style="margin-top:16px">
+      <h3 class="card-title">Modifier le tarif — {{ labelJour(ce.jour) }} {{ formatHeure(t.heureDebut) }}–{{ formatHeure(t.heureFin) }}</h3>
+      <p class="hint">Modifie le prix/libellé pour ce jour uniquement. Les autres jours ne changent pas.</p>
+      <div class="form-row">
+        <div class="form-group form-group--grow">
+          <label class="form-label">Libellé</label>
+          <input type="text" class="form-control"
+            [value]="ceLibelle()" (input)="ceLibelle.set($any($event.target).value)" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Prix / h (€)</label>
+          <input type="number" class="form-control"
+            [value]="cePrix()" (input)="cePrix.set($any($event.target).valueAsNumber)" />
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-secondary" (click)="annulerEditionCellule()" [disabled]="ceSaving()">Annuler</button>
+        <button class="btn-primary" (click)="enregistrerCellule()" [disabled]="ceSaving()">
+          {{ ceSaving() ? 'Enregistrement…' : 'Enregistrer ce créneau' }}
+        </button>
+      </div>
+    </div>
+  }
+}
+
+<div class="form-actions" style="margin-top:16px">
+  <button class="btn-secondary" (click)="annulerModifsPlanning()" [disabled]="tarifSaving()">Réinitialiser</button>
+  <button class="btn-primary" (click)="enregistrerPlanning()" [disabled]="tarifSaving()">
+    {{ tarifSaving() ? 'Enregistrement…' : 'Enregistrer le planning' }}
+  </button>
+</div>

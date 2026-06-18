@@ -1,0 +1,76 @@
+<div class="banner">📞 Réservation manuelle (ex. appel buvette) — rattachée à un compte client existant.</div>
+
+@if (mError()) { <div class="error-message">{{ mError() }}</div> }
+@if (mSuccess()) { <div class="success-message">{{ mSuccess() }}</div> }
+
+<div class="card form-card">
+  <div class="form-group">
+    <label class="form-label">Client</label>
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Rechercher par nom, prénom ou email…"
+      [value]="recherche()"
+      (input)="onRecherche($any($event.target).value)" />
+    @if (resultats().length) {
+      <div class="search-results">
+        @for (u of resultats(); track u.id) {
+          <button class="search-item" (click)="choisirClient(u)">
+            <strong>{{ u.prenom }} {{ u.nom }}</strong> — {{ u.email }}
+          </button>
+        }
+      </div>
+    }
+    @if (clientChoisi(); as c) {
+      <p class="client-choisi">✓ {{ c.prenom }} {{ c.nom }} ({{ c.email }})</p>
+    }
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label class="form-label">Terrain</label>
+      <select class="form-control" [value]="mTerrainId()" (change)="mTerrainId.set($any($event.target).value)">
+        @for (t of terrainsActifs(); track t.id) {
+          <option [value]="t.id">{{ t.nom }}</option>
+        }
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Date</label>
+      <input type="date" class="form-control" [value]="mDate()" (input)="mDate.set($any($event.target).value)" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Heure de début</label>
+      <input type="time" step="1800" class="form-control" [value]="mHeure()" (input)="mHeure.set($any($event.target).value)" />
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">Durée</label>
+    <div class="choice-row">
+      <button class="choice" [class.choice--active]="mDuree() === 60" (click)="mDuree.set(60)">1h</button>
+      <button class="choice" [class.choice--active]="mDuree() === 90" (click)="mDuree.set(90)">1h30</button>
+      <button class="choice" [class.choice--active]="mDuree() === 120" (click)="mDuree.set(120)">2h</button>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">Moyen de paiement</label>
+    <div class="choice-row">
+      <button class="choice" [class.choice--active]="mMoyen() === 'EnLigne'" (click)="mMoyen.set('EnLigne')">💳 En ligne</button>
+      <button class="choice" [class.choice--active]="mMoyen() === 'SurPlace'" (click)="mMoyen.set('SurPlace')">🏠 Sur place</button>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">Message (optionnel)</label>
+    <textarea class="form-control" rows="2" placeholder="Ex : blocage maintenance, tournoi…"
+      [value]="mMessage()" (input)="mMessage.set($any($event.target).value)"></textarea>
+  </div>
+
+  <div class="form-actions">
+    <button class="btn-primary" (click)="reserverManuel()" [disabled]="mSaving()">
+      {{ mSaving() ? 'Création…' : 'Créer la réservation' }}
+    </button>
+  </div>
+</div>

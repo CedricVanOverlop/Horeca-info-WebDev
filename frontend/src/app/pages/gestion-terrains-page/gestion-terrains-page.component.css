@@ -1,0 +1,15 @@
+:host { display: block; background: #f5f5f5; min-height: 100vh; }
+
+.gestion-container { max-width: 1000px; margin: 0 auto; padding: 24px 16px 64px; }
+
+.page-header { margin-bottom: 20px; }
+.page-title { font-size: 1.6rem; font-weight: 700; color: #222; margin: 0; }
+
+/* ── Onglets (projetés dans la navbar) ──────────────────── */
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.tab {
+  background: transparent; border: 1px solid transparent; border-radius: 8px;
+  padding: 8px 16px; cursor: pointer; font-size: 0.95rem; color: #555;
+}
+.tab:hover { background: #f0f0f0; }
+.tab--active { background: #222; color: #fff; border-color: #222; font-weight: 600; }

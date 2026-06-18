@@ -175,6 +175,27 @@ public class UserGateway(
     public Task<bool> IsActive(int id) => userRepository.IsActive(id);
 
     /// <summary>
+    /// Recherche des utilisateurs actifs par nom, prénom ou email (réservation manuelle).
+    /// Le rôle n'est pas résolu ici (non nécessaire pour la sélection d'un bénéficiaire).
+    /// </summary>
+    /// <param name="query">Terme de recherche.</param>
+    /// <returns>Les utilisateurs correspondants.</returns>
+    public async Task<IEnumerable<User>> Search(string query)
+    {
+        var dbs = await userRepository.Search(query);
+        return dbs.Select(db => new User
+        {
+            Id          = db.Id,
+            Nom         = db.Nom,
+            Prenom      = db.Prenom,
+            Email       = db.Email,
+            Telephone   = db.Telephone,
+            PointsSolde = db.PointsSolde,
+            Role        = "Client"
+        });
+    }
+
+    /// <summary>
     /// Met à jour les informations personnelles d'un utilisateur (nom, prénom, email, téléphone).
     /// </summary>
     /// <param name="request">Nouvelles données de l'utilisateur, identifié par son Id.</param>

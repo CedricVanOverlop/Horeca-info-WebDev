@@ -1,20 +1,178 @@
 <app-navbar></app-navbar>
 
 <div class="padel-container">
-  <h2>Terrains de Padel</h2>
-  @if (loading()) {
-    <div>Chargement...</div>
-  }
+
+  <div class="page-header">
+    <h1 class="page-title">Réserver votre terrain</h1>
+    <p class="page-subtitle">Choisissez un terrain, une semaine, puis cliquez sur un créneau libre.</p>
+  </div>
+
   @if (error()) {
     <div class="error-message">{{ error() }}</div>
   }
-  @if (!loading() && !error()) {
-    @for (terrain of terrains(); track terrain.id) {
-      <div class="terrain-card">
-        <h3>{{ terrain.nom }}</h3>
-        <p>Type: {{ terrain.type }}</p>
-        <p>Disponible: {{ terrain.disponible ? 'Oui' : 'Non' }}</p>
+
+  @if (loading()) {
+    <div class="loading-state">Chargement…</div>
+  }
+
+  <!-- Barre : onglets terrains + navigation semaine -->
+  <div class="toolbar">
+    <div class="terrain-tabs">
+      @for (t of terrainsActifs(); track t.id) {
+        <button
+          class="terrain-tab"
+          [class.terrain-tab--active]="terrainSelectionne()?.id === t.id"
+          (click)="selectionnerTerrain(t)">
+          {{ t.nom }}
+        </button>
+      }
+    </div>
+
+    <div class="week-nav">
+      <button class="week-btn" (click)="semainePrecedente()" aria-label="Semaine précédente">‹</button>
+      <span class="week-label">{{ libelleSemaine() }}</span>
+      <button class="week-btn" (click)="semaineSuivante()" aria-label="Semaine suivante">›</button>
+    </div>
+  </div>
+
+  @if (terrainSelectionne(); as terrain) {
+    <!-- Grille hebdomadaire -->
+    <div class="grid">
+      <div class="grid-row grid-row--head">
+        <div class="grid-corner"></div>
+        @for (jour of joursSemaine(); track jour.getTime(); let i = $index) {
+          <div class="grid-day">
+            <span class="grid-day-name">{{ jourCourt(i) }}</span>
+            <span class="grid-day-num">{{ jour.getDate() }}</span>
+          </div>
+        }
+      </div>
+
+      @for (h of heures(); track h) {
+        <div class="grid-row">
+          <div class="grid-hour">{{ heureLabel(h) }}</div>
+          @for (jour of joursSemaine(); track jour.getTime(); let i = $index) {
+            <button
+              class="cell"
+              [class.cell--occupe]="estOccupe(jour, h)"
+              [class.cell--passe]="(estPasse(jour, h) || estTropLoin(jour)) && !estOccupe(jour, h)"
+              [disabled]="estOccupe(jour, h) || estPasse(jour, h) || estTropLoin(jour)"
+              (click)="ouvrirReservation(jour, h)"
+              [attr.aria-label]="jourCourt(i) + ' ' + heureLabel(h)">
+            </button>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Légende -->
+    <div class="legend">
+      <span class="legend-item"><span class="legend-swatch legend-swatch--occupe"></span> Réservé</span>
+      <span class="legend-item"><span class="legend-swatch legend-swatch--libre"></span> Libre — cliquez pour réserver</span>
+    </div>
+  }
+
+  <!-- Mes réservations -->
+  <section class="mes-resas">
+    <h2 class="section-title">Mes réservations</h2>
+    @if (mesReservations().length === 0) {
+      <p class="empty-state">Aucune réservation pour le moment.</p>
+    } @else {
+      <div class="resa-list">
+        @for (r of mesReservations(); track r.id) {
+          <div class="resa-card">
+            <div class="resa-info">
+              <p class="resa-main">{{ nomTerrain(r.terrainId) }}</p>
+              <p class="resa-meta">
+                {{ formatDateCourte(r.date) }} · {{ formatHeure(r.heureDebut) }}–{{ formatHeure(r.heureFin) }}
+              </p>
+            </div>
+            <span class="resa-prix">{{ r.prixPaye }} €</span>
+            <button class="btn-danger btn-danger--outline" (click)="demanderAnnulation(r)">Annuler</button>
+          </div>
+        }
       </div>
     }
-  }
+  </section>
 </div>
+
+<!-- ════════════ MODAL : Confirmation de réservation ════════════ -->
+@if (slot(); as s) {
+  <div class="modal-backdrop" (click)="fermerModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2 class="modal-title">Confirmer la réservation</h2>
+      <p class="recap-box">{{ recapModal() }}</p>
+
+      @if (modalError()) { <div class="error-message">{{ modalError() }}</div> }
+
+      <div class="form-group">
+        <label class="form-label">Durée</label>
+        <div class="choice-row">
+          <button class="choice" [class.choice--active]="duree() === 60" (click)="duree.set(60)">1h</button>
+          <button class="choice" [class.choice--active]="duree() === 90" (click)="duree.set(90)">1h30</button>
+          <button class="choice" [class.choice--active]="duree() === 120" (click)="duree.set(120)">2h</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Moyen de paiement</label>
+        <div class="choice-row">
+          <button class="choice" [class.choice--active]="moyenPaiement() === 'EnLigne'" (click)="moyenPaiement.set('EnLigne')">💳 En ligne</button>
+          <button class="choice" [class.choice--active]="moyenPaiement() === 'SurPlace'" (click)="moyenPaiement.set('SurPlace')">🏠 Sur place</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Message (optionnel)</label>
+        <textarea
+          class="form-control"
+          rows="2"
+          placeholder="Ex : anniversaire, tournoi…"
+          [value]="message()"
+          (input)="message.set($any($event.target).value)"></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" (click)="fermerModal()" [disabled]="saving()">Annuler</button>
+        <button class="btn-primary" (click)="confirmerReservation()" [disabled]="saving()">
+          {{ saving() ? 'Réservation…' : 'Confirmer la réservation' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ════════════ MODAL : Annulation ════════════ -->
+@if (resaAAnnuler(); as r) {
+  <div class="modal-backdrop" (click)="fermerAnnulation()">
+    <div class="modal modal--sm" (click)="$event.stopPropagation()">
+
+      @if (recapAnnulation(); as recap) {
+        <!-- Étape 2 : récapitulatif après annulation -->
+        <h2 class="modal-title">Réservation annulée</h2>
+        <pre class="recap-text">{{ recap }}</pre>
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="fermerAnnulation()">Fermer</button>
+          <button class="btn-primary" (click)="telechargerRecap()">Télécharger le récapitulatif</button>
+        </div>
+      } @else {
+        <!-- Étape 1 : confirmation -->
+        <h2 class="modal-title">Annuler cette réservation ?</h2>
+        <p class="modal-text">
+          {{ nomTerrain(r.terrainId) }} — {{ formatDateCourte(r.date) }} ·
+          {{ formatHeure(r.heureDebut) }}–{{ formatHeure(r.heureFin) }}.
+          L'annulation n'est possible qu'à plus de 12h du créneau.
+        </p>
+
+        @if (annulError()) { <div class="error-message">{{ annulError() }}</div> }
+
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="fermerAnnulation()" [disabled]="annulSaving()">Retour</button>
+          <button class="btn-danger" (click)="confirmerAnnulation()" [disabled]="annulSaving()">
+            {{ annulSaving() ? '…' : 'Confirmer l\'annulation' }}
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+}
