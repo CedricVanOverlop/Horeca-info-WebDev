@@ -5,7 +5,6 @@ import { LoginPageComponent } from './pages/login-page/login-page.component';
 import { RegisterPageComponent } from './pages/register-page/register-page.component';
 import { HomePageComponent } from './pages/home-page/home-page.component';
 import { MonComptePageComponent } from './pages/mon-compte-page/mon-compte-page.component';
-import { FidelitePageComponent } from './pages/fidelite-page/fidelite-page.component';
 import { PadelPageComponent } from './pages/padel-page/padel-page.component';
 import { DisponibilitesPageComponent } from './pages/disponibilites-page/disponibilites-page.component';
 import { MonHorairePageComponent } from './pages/mon-horaire-page/mon-horaire-page.component';
@@ -47,7 +46,6 @@ export const NAV: NavItem[] = [
 
   // Pages protégées (AuthGuard + RoleGuard, présentes dans la sidebar)
   { path: 'mon-compte', component: MonComptePageComponent, label: 'Mon compte', roles: ALL_ROLES, sidebar: true },
-  { path: 'fidelite', component: FidelitePageComponent, label: 'Mes points de fidélité', roles: [Roles.Client, Roles.Employe, Roles.Administrateur], sidebar: true },
   { path: 'padel', component: PadelPageComponent, label: 'Réserver un terrain', roles: [Roles.Client, Roles.Employe, Roles.Cuisine, Roles.Administrateur], sidebar: true },
   { path: 'disponibilites', component: DisponibilitesPageComponent, label: 'Mes disponibilités', roles: [Roles.Employe, Roles.Administrateur], sidebar: true },
   { path: 'mon-horaire', component: MonHorairePageComponent, label: 'Mon horaire', roles: [Roles.Employe, Roles.Administrateur], sidebar: true },

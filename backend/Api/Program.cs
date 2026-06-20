@@ -74,9 +74,6 @@ app.UseMiddleware<ActiveUserMiddleware>();
 app.UseAuthorization();
 
 app.MapUtilisateurRoutes();
-app.MapFideliteRoutes();
 app.MapPadelRoutes();
-app.MapPersonnelRoutes();
-app.MapPlanningRoutes();
 
 app.Run();

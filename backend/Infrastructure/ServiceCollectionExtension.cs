@@ -21,15 +21,12 @@ public static class ServiceCollectionExtension
 
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IEmployeRepository, EmployeRepository>();
-        services.AddScoped<IFideliteRepository, FideliteRepository>();
         services.AddScoped<IPlanningRepository, PlanningRepository>();
         services.AddScoped<IReservationRepository, ReservationRepository>();
         services.AddScoped<ITerrainRepository, TerrainRepository>();
         services.AddScoped<ITarifRepository, TarifRepository>();
 
         services.AddScoped<IUserGateway, UserGateway>();
-        services.AddScoped<IEmployeGateway, EmployeGateway>();
-        services.AddScoped<IFideliteGateway, FideliteGateway>();
         services.AddScoped<IPlanningGateway, PlanningGateway>();
         services.AddScoped<IReservationGateway, ReservationGateway>();
         services.AddScoped<ITerrainGateway, TerrainGateway>();

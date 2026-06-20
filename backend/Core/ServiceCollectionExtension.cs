@@ -9,9 +9,7 @@ public static class ServiceCollectionExtension
     public static IServiceCollection AddCoreServices(this IServiceCollection services)
     {
         services.AddScoped<IUserUseCases, UserUseCases>();
-        services.AddScoped<IFideliteUseCases, FideliteUseCases>();
         services.AddScoped<IPadelUseCases, PadelUseCases>();
-        services.AddScoped<IPersonnelUseCases, PersonnelUseCases>();
         services.AddScoped<IPlanningUseCases, PlanningUseCases>();
         return services;
     }

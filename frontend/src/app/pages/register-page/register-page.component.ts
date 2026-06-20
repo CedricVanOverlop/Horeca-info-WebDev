@@ -12,8 +12,8 @@ import { NavbarComponent } from '../../components/navbar/navbar.component';
   styleUrls: ['./register-page.component.css']
 })
 export class RegisterPageComponent implements OnInit {
-  registerForm!: FormGroup;
-  serverError: string | null = null;
+  registerForm!: FormGroup; // ! car initialiser plus tard dans ngOnInit()
+  serverError: string | null = null; 
 
   constructor(
     private fb: FormBuilder,
