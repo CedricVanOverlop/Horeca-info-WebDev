@@ -116,11 +116,11 @@ Deux fichiers SQL à exécuter **dans cet ordre** (le second a besoin du premier
 2. Menu **File → Open SQL Script…**, choisis `horeca_db.sql`, puis clique sur l'éclair ⚡ pour l'exécuter.
 3. Recommence avec `seed.sql`.
 
-### Option B — en ligne de commande
+### Option B — en ligne de commande (remplacé root par le nom de l'utilisateur)
 
 ```powershell
-mysql -u root -p < backend/Infrastructure/horeca_db.sql
-mysql -u root -p < backend/Infrastructure/seed.sql
+mysql --default-character-set=utf8mb4 -u root -p < backend/Infrastructure/horeca_db.sql
+mysql --default-character-set=utf8mb4 -u root -p < backend/Infrastructure/seed.sql
 ```
 
 > `seed.sql` est **ré-exécutable** : il supprime d'abord les comptes de test (`%@test.com`)
