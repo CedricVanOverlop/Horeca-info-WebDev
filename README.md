@@ -103,6 +103,8 @@ Horeca-info-WebDev/
 
 ## 3. Créer la base de données
 
+Dans Services (Win+R, services.mcs), ne pas oublier de lancer MySQL80 si ce n'est pas automatique.
+
 Deux fichiers SQL à exécuter **dans cet ordre** (le second a besoin du premier) :
 
 1. `backend/Infrastructure/horeca_db.sql` → crée la base `horeca_info` et toutes les tables.
@@ -242,22 +244,3 @@ Puis ouvre **http://localhost:4200**.
 | Port 5287 ou 4200 déjà occupé | Une instance tourne déjà | Ferme l'autre process (ou `ng serve --port 4300` pour le front) |
 | `MSB3027` / DLL verrouillée au build | Le backend tourne déjà dans un autre terminal | Arrête-le (`Ctrl+C`) avant de relancer |
 
----
-
-## 10. Pour aller plus loin
-
-- **`CLAUDE.md`** — règles et consignes complètes du projet (architecture, conventions, règles métier).
-- **`CODEBASE.md`** — carte détaillée de tous les fichiers, expliqués par type.
-- **`backend/Infrastructure/horeca_db.sql`** — schéma complet de la base (source de vérité).
-
-### Résolution des rôles (rappel)
-
-| Rôle | Condition |
-|---|---|
-| **Client** | aucune ligne `EMPLOYE` active |
-| **Employe** | `EMPLOYE.acces = 'Employe'` et `actif = TRUE` |
-| **Cuisine** | `EMPLOYE.acces = 'Cuisine'` et `actif = TRUE` |
-| **Administrateur** | `EMPLOYE.acces = 'Administrateur'` et `actif = TRUE` |
-
-Sécurité serveur via policies ASP.NET Core (`AdminOnly`, `CuisineOrAdmin`, `PersonnelOnly`) ;
-guards Angular (`auth.guard`, `role.guard`) complémentaires côté client.
