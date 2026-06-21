@@ -76,7 +76,7 @@ INSERT INTO UTILISATEUR (nom, prenom, email, mot_de_passe, telephone, points_sol
   ('Simon',     'Julie',   'employe4@test.com',  @pwd_hash, '+32 479 18 28 38',  0.00, TRUE),
   ('Roux',      'Tom',     'employe5@test.com',  @pwd_hash, '+32 470 19 29 39',  0.00, TRUE),
   -- Cuisine (acces='Cuisine')
-  ('Fontaine',  'Léa',     'cuisine1@test.com',  @pwd_hash, '+32 471 30 40 50',  0.00, TRUE),
+  ('Friterie',  'Cuisine',     'cuisine1@test.com',  @pwd_hash, '+32 471 30 40 50',  0.00, TRUE),
   -- Administrateur (acces='Administrateur') — compte de démo principal
   ('Vandamme',  'Pierre',  'admin1@test.com',    @pwd_hash, '+32 472 31 41 51',  0.00, TRUE);
 

@@ -5,12 +5,8 @@ Trois commerces sur un même site : **Friterie.net**, **Baraque à Glaces**, **C
 Elle gère ce qu'Odoo ne couvre pas (comptes clients/staff, fidélité, planning, réservations padel)
 et ne duplique aucune donnée gérée par Odoo (stocks, factures, catalogue).
 
-Architecture **Clean Architecture** en 3 projets C# — `Api` → `Core` (logique métier, interfaces) ←
-`Infrastructure` (Dapper, gateways) — avec un frontend Angular 21 standalone.
-
----
-
-## 1. Stack technique
+> 📘 **Ce README est un manuel d'installation pas à pas.** Suis les sections **1 → 7 dans l'ordre**,
+> même si tu n'as pas l'habitude : chaque étape t'explique quoi faire et comment vérifier que ça marche.
 
 | Couche | Technologie | Version |
 |---|---|---|
@@ -21,54 +17,122 @@ Architecture **Clean Architecture** en 3 projets C# — `Api` → `Core` (logiqu
 
 ---
 
-## 2. Prérequis
+## Fonctionnalités (état au rendu)
 
-Installer ces 4 outils, puis vérifier chaque version avec la commande indiquée.
+> 🎯 **Pour la démo** : le module **Authentification / Comptes** est complet de bout en bout
+> (inscription → connexion → rôles → administration). Le module **Padel** est complet côté client
+> et admin. Les autres modules sont à l'état de maquette (voir « Reste à faire »).
 
-| Outil | Version min. | Vérifier | Installer |
-|---|---|---|---|
-| .NET SDK | **10.0** | `dotnet --version` → `10.0.x` | https://dotnet.microsoft.com/download/dotnet/10.0 |
-| Node.js | **20 LTS+** | `node --version` → `v20.x`+ | https://nodejs.org |
-| Angular CLI | **21** | `ng version` | `npm install -g @angular/cli@21` |
-| MySQL Server | **8.0** | `mysql --version` → `8.0.x` | https://dev.mysql.com/downloads/mysql/ |
+### ✅ Implémenté et fonctionnel
 
-> Sous Windows, `dotnet`, `node`, `npm`, `ng` et `mysql` doivent être dans le `PATH`.
-> Si `mysql` est introuvable, ajouter `C:\Program Files\MySQL\MySQL Server 8.0\bin` au `PATH`
-> (ou utiliser MySQL Workbench pour exécuter les scripts SQL).
+**Authentification & comptes** (complet, front + back)
+- Inscription (`/register`) avec validation, email unique (409), réactivation d'un compte supprimé
+- Connexion JWT (`/login`) + déconnexion
+- Mon compte : voir/modifier son profil, changer son mot de passe, supprimer son compte (soft-delete)
+- Rôles (Client / Employé / Cuisine / Administrateur) avec **guards Angular** + **policies serveur**
+- Sidebar filtrée dynamiquement selon le rôle connecté
+
+**Administration des utilisateurs** (Administrateur)
+- Liste + recherche des comptes
+- Changer le rôle d'un utilisateur
+- Ajuster son solde de points de fidélité (avec motif)
+- Bloquer / débloquer un compte
+- Supprimer un compte (soft-delete)
+- Voir le détail de ses réservations et de ses horaires
+
+**Padel** (complet, front + back)
+- Client : consulter les terrains, voir les tarifs (calcul auto jour/plage), créneaux occupés, réserver, voir/annuler ses réservations
+- Admin : créer/modifier/(dés)activer des terrains, gérer la grille tarifaire (ajout/modif/suppression)
+- Staff (Cuisine/Admin) : rechercher un client, créer une réservation manuelle (= blocage de créneau)
+
+### 🚧 Reste à faire (maquettes / non branché)
+
+| Module | État actuel | À faire |
+|---|---|---|
+| Planning employé | Pages `Mes disponibilités` / `Mon horaire` vides ; back partiel (seule la vue admin des horaires existe) | Déclaration des dispos + consultation horaire côté employé, endpoints associés |
+| Création d'horaires (admin) | Page `Créer des horaires` vide | Génération/attribution des horaires |
+| Gestion Cuisine | Page vide | Fonctions liées à la cuisine |
+| Gestion Stocks | Page vide | Lecture/écriture des stocks **via l'API Odoo** (Phase 3) |
+| Fidélité (client) | Solde visible dans le profil + ajustement admin ; pas de page client dédiée | Page gain/dépense de points côté client |
+| Intégration Odoo | Non démarré | Proxy backend vers Odoo (credentials jamais exposés au front) |
+
+> ℹ️ **Pourquoi des pages blanches dans le menu ?** Les pages ci-dessus (Mes disponibilités,
+> Mon horaire, Créer des horaires, Gestion Cuisine, Gestion Stocks) sont **laissées
+> volontairement** comme maquettes : elles servent à démontrer que l'**authentification et le
+> filtrage par rôle fonctionnent jusqu'au bout** — chaque rôle ne voit dans la sidebar que les
+> entrées qui le concernent, et les guards bloquent l'accès direct par URL. Le contenu métier de
+> ces pages fait partie des évolutions futures.
 
 ---
 
-## 3. Installation pas à pas
+## 1. Ce qu'il faut installer avant de commencer
 
-### 3.a — Cloner le dépôt
+Installe ces 3 logiciels. Pour chacun : clique le lien, prends la version indiquée (ou plus récente),
+puis ouvre un terminal et tape la commande de vérification — si elle affiche un numéro de version, c'est bon.
 
-```bash
+| Logiciel | Version min. | Lien de téléchargement | Vérifier (dans un terminal) |
+|---|---|---|---|
+| **SDK .NET 10** | 10.0 | https://dotnet.microsoft.com/download/dotnet/10.0 | `dotnet --version` → `10.0.x` |
+| **Node.js** (inclut npm) | 20 LTS+ | https://nodejs.org | `node --version` puis `npm --version` |
+| **MySQL Server** | 8.0 | https://dev.mysql.com/downloads/installer/ | `mysql --version` → `8.0.x` |
+
+> 💡 **Conseil débutant** : pendant l'installation de MySQL, coche aussi **MySQL Workbench**
+> (proposé dans le même installeur). C'est une fenêtre graphique qui rend la création de la base
+> beaucoup plus simple que la ligne de commande.
+>
+> Tout est testé sous **Windows 11** avec **PowerShell**. Les commandes ci-dessous sont en PowerShell.
+
+---
+
+## 2. Récupérer le projet
+
+```powershell
 git clone https://github.com/CedricVanOverlop/Horeca-info-WebDev.git
 cd Horeca-info-WebDev
 ```
 
-### 3.b — Créer la base de données
+Le projet a deux dossiers principaux :
 
-**Deux scripts, dans cet ordre strict** (le second dépend du premier) :
+```
+Horeca-info-WebDev/
+├── backend/     ← l'API .NET (le serveur)
+└── frontend/    ← l'application Angular (le site web)
+```
 
-```bash
-# 1) Schéma : crée la base horeca_info, toutes les tables, contraintes et la table COMMERCE.
+---
+
+## 3. Créer la base de données
+
+Deux fichiers SQL à exécuter **dans cet ordre** (le second a besoin du premier) :
+
+1. `backend/Infrastructure/horeca_db.sql` → crée la base `horeca_info` et toutes les tables.
+2. `backend/Infrastructure/seed.sql` → remplit la base avec des données de test (comptes, terrains, réservations).
+
+### Option A — avec MySQL Workbench (recommandé pour débuter)
+
+1. Ouvre MySQL Workbench, connecte-toi à ton serveur local (utilisateur `root`).
+2. Menu **File → Open SQL Script…**, choisis `horeca_db.sql`, puis clique sur l'éclair ⚡ pour l'exécuter.
+3. Recommence avec `seed.sql`.
+
+### Option B — en ligne de commande
+
+```powershell
 mysql -u root -p < backend/Infrastructure/horeca_db.sql
-
-# 2) Comptes de test : 12 utilisateurs prêts à l'emploi (voir section 7). APRÈS le schéma.
 mysql -u root -p < backend/Infrastructure/seed.sql
 ```
 
-> `seed.sql` est **ré-exécutable** : il supprime d'abord les comptes `%@test.com`
-> existants (dans le bon ordre FK) avant de les réinsérer. Aucune erreur si relancé.
+> `seed.sql` est **ré-exécutable** : il supprime d'abord les comptes de test (`%@test.com`)
+> dans le bon ordre, puis les recrée. Aucune erreur si tu le relances pour repartir propre.
 > Les mots de passe y sont stockés en **hash BCrypt réel** (jamais en clair).
 
-### 3.c — Configurer les secrets
+---
 
-Les secrets ne sont **jamais** dans `appsettings.json` (versionné). Deux options au choix.
+## 4. Configurer les secrets du backend
 
-**Option A — fichier de dev local (recommandé)**
-Créer `backend/Api/appsettings.Development.json` (ignoré par Git) :
+Pour des raisons de sécurité, la **clé JWT** et la **connexion MySQL** ne sont **jamais** écrites
+dans le code versionné. Tu dois créer un fichier local (ignoré par Git) qui les contient.
+
+Crée le fichier **`backend/Api/appsettings.Development.json`** avec ce contenu :
 
 ```json
 {
@@ -76,91 +140,117 @@ Créer `backend/Api/appsettings.Development.json` (ignoré par Git) :
     "DefaultConnection": "Server=localhost;Database=horeca_info;Uid=root;Pwd=root;"
   },
   "Jwt": {
-    "Key": "ma-cle-jwt-de-demo-32-caracteres-minimum-0123456789"
+    "Key": "remplace-ceci-par-une-longue-phrase-secrete-de-32-caracteres-minimum"
   }
 }
 ```
 
-**Option B — variables d'environnement** (prioritaires sur le fichier ci-dessus) :
+Adapte :
+- `Uid` / `Pwd` à ton installation MySQL (souvent `root` + le mot de passe choisi à l'install).
+- `Jwt:Key` : une longue chaîne aléatoire d'**au moins 32 caractères** (elle signe les jetons de connexion).
 
-```powershell
-# Windows PowerShell (session courante)
-$env:DB_CONNECTION = "Server=localhost;Database=horeca_info;Uid=root;Pwd=root;"
-$env:JWT_KEY       = "ma-cle-jwt-de-demo-32-caracteres-minimum-0123456789"
-```
-
-```bash
-# Linux / macOS (bash)
-export DB_CONNECTION="Server=localhost;Database=horeca_info;Uid=root;Pwd=root;"
-export JWT_KEY="ma-cle-jwt-de-demo-32-caracteres-minimum-0123456789"
-```
-
-> ⚠️ **Erreur n°1 au premier lancement** : sans `JWT_KEY` (ou `Jwt:Key`), **l'API refuse de
-> démarrer** avec `Variable d'environnement JWT_KEY manquante.`. La clé doit faire **au moins
-> 32 caractères** (sinon erreur de signature au login : *IDX10720 / key size too small*).
-> Adapter `Uid`/`Pwd` à votre installation MySQL (souvent `root` / le mot de passe choisi à l'install).
-
-### 3.d — Restaurer les dépendances frontend
-
-```bash
-cd frontend
-npm install
-cd ..
-```
+> ✅ Ce fichier est déjà listé dans `.gitignore` : il ne partira **jamais** sur Git.
+> En production, on utilise plutôt les variables d'environnement `DB_CONNECTION` et `JWT_KEY`
+> (elles sont prioritaires sur le fichier ci-dessus).
 
 ---
 
-## 4. Lancer le backend
+## 5. Lancer le backend (le serveur)
 
-```bash
-cd backend/Api
-dotnet run --launch-profile https
+Dans un **premier terminal**, à la racine du projet :
+
+```powershell
+dotnet run --project backend/Api
 ```
 
-- API : **https://localhost:7160** (et http://localhost:5287).
-- Swagger (dev uniquement) : **https://localhost:7160/swagger**.
+Au premier lancement, .NET télécharge ses dépendances — c'est normal que ce soit un peu long.
 
-> Le frontend de dev appelle `https://localhost:7160` → lancer impérativement le profil `https`.
+Quand c'est prêt, le serveur écoute sur **http://localhost:5287**.
+Pour vérifier, ouvre dans ton navigateur **http://localhost:5287/swagger** : tu verras la liste de
+toutes les routes de l'API.
 
-## 5. Lancer le frontend
+> ⚠️ Laisse ce terminal ouvert : si tu le fermes, le serveur s'arrête.
 
-Dans un **second terminal** (le backend doit rester lancé en parallèle) :
+---
 
-```bash
+## 6. Lancer le frontend (le site web)
+
+Dans un **deuxième terminal** (sans fermer le premier) :
+
+```powershell
+cd frontend
+npm install      # à faire une seule fois — installe les dépendances Angular (long la 1re fois)
+npm start        # lance le site
+```
+
+Quand c'est prêt, ouvre **http://localhost:4200** dans ton navigateur. 🎉
+(Les fois suivantes, tu peux sauter `npm install` et faire directement `npm start`.)
+
+---
+
+## 7. Se connecter — comptes de test
+
+Tous les comptes créés par `seed.sql` ont le **même mot de passe : `Test123`**.
+
+> 🔑 **Pour tout voir, connecte-toi d'abord avec le compte admin : `admin1@test.com` / `Test123`.**
+
+| Email | Mot de passe | Rôle |
+|---|---|---|
+| **admin1@test.com** | **Test123** | **Administrateur** (accès complet) |
+| cuisine1@test.com | Test123 | Cuisine |
+| employe1@test.com … employe5@test.com | Test123 | Employé |
+| user1@test.com … user5@test.com | Test123 | Client (user2/3/5 ont des points de fidélité) |
+
+> Besoin d'un nouveau client ? La page `http://localhost:4200/register` permet aussi de s'inscrire.
+
+---
+
+## 8. Récapitulatif rapide (une fois tout installé)
+
+Deux terminaux, lancés à la racine du projet :
+
+```powershell
+# Terminal 1 — backend
+dotnet run --project backend/Api
+
+# Terminal 2 — frontend
 cd frontend
 npm start
 ```
 
-- Application : **http://localhost:4200**.
+Puis ouvre **http://localhost:4200**.
 
-> Back **et** front tournent simultanément, dans 2 terminaux distincts.
+| Service | Adresse |
+|---|---|
+| Site web (frontend) | http://localhost:4200 |
+| API (backend) | http://localhost:5287 |
+| Documentation API (Swagger) | http://localhost:5287/swagger |
 
 ---
 
-## 6. Comptes de test
+## 9. En cas de problème
 
-Tous les comptes ci-dessous (créés par `seed.sql`) ont le mot de passe **`Test123`**.
-
-> 🔑 **Compte de démo principal : `admin1@test.com` / `Test123`** (accès Administrateur complet).
-
-| Email | Mot de passe | Rôle |
+| Symptôme | Cause probable | Solution |
 |---|---|---|
-| **admin1@test.com** | **Test123** | **Administrateur** |
-| cuisine1@test.com | Test123 | Cuisine |
-| employe1@test.com | Test123 | Employe (Friterie) |
-| employe2@test.com | Test123 | Employe (Glaces) |
-| employe3@test.com | Test123 | Employe (Padel) |
-| employe4@test.com | Test123 | Employe (polyvalent) |
-| employe5@test.com | Test123 | Employe (Friterie) |
-| user1@test.com | Test123 | Client |
-| user2@test.com | Test123 | Client (50 pts) |
-| user3@test.com | Test123 | Client (12,5 pts) |
-| user4@test.com | Test123 | Client |
-| user5@test.com | Test123 | Client (120 pts) |
+| `Variable d'environnement JWT_KEY manquante.` au démarrage de l'API | Fichier `appsettings.Development.json` absent, mal nommé, ou clé `Jwt:Key` manquante | Refais l'**étape 4**, vérifie le nom exact du fichier et le bloc `Jwt:Key` |
+| Login échoue avec *IDX10720 / key too small* | Clé JWT trop courte | Mets une clé d'**au moins 32 caractères** |
+| `Variable d'environnement DB_CONNECTION manquante.` | Pas de chaîne de connexion | Renseigne `ConnectionStrings:DefaultConnection` (étape 4) |
+| `Access denied for user 'root'@'localhost'` | Mauvais identifiants MySQL | Corrige `Uid`/`Pwd` dans la chaîne de connexion |
+| `Unknown database 'horeca_info'` | Schéma non créé | Exécute `horeca_db.sql` (étape 3) |
+| Login renvoie 401 alors que le compte existe | Comptes de test non chargés | Exécute `seed.sql` **après** `horeca_db.sql` |
+| Le site se charge mais aucune donnée / erreurs réseau (CORS) | Backend non lancé, ou pas sur le port 5287 | Vérifie que le terminal 1 tourne sur http://localhost:5287 |
+| Port 5287 ou 4200 déjà occupé | Une instance tourne déjà | Ferme l'autre process (ou `ng serve --port 4300` pour le front) |
+| `MSB3027` / DLL verrouillée au build | Le backend tourne déjà dans un autre terminal | Arrête-le (`Ctrl+C`) avant de relancer |
 
-> Besoin d'un nouveau client ? La page `http://localhost:4200/register` permet aussi de s'inscrire.
+---
 
-### Résolution des rôles
+## 10. Pour aller plus loin
+
+- **`CLAUDE.md`** — règles et consignes complètes du projet (architecture, conventions, règles métier).
+- **`CODEBASE.md`** — carte détaillée de tous les fichiers, expliqués par type.
+- **`backend/Infrastructure/horeca_db.sql`** — schéma complet de la base (source de vérité).
+
+### Résolution des rôles (rappel)
 
 | Rôle | Condition |
 |---|---|
@@ -171,85 +261,3 @@ Tous les comptes ci-dessous (créés par `seed.sql`) ont le mot de passe **`Test
 
 Sécurité serveur via policies ASP.NET Core (`AdminOnly`, `CuisineOrAdmin`, `PersonnelOnly`) ;
 guards Angular (`auth.guard`, `role.guard`) complémentaires côté client.
-
----
-
-## 7. Dépannage
-
-| Symptôme | Cause probable | Solution |
-|---|---|---|
-| `Variable d'environnement JWT_KEY manquante.` au démarrage de l'API | Aucun secret JWT défini | Définir `JWT_KEY` (≥ 32 caractères) ou `Jwt:Key` dans `appsettings.Development.json` (section 3.c) |
-| Login échoue avec *IDX10720 / key too small* | Clé JWT trop courte | Utiliser une clé d'**au moins 32 caractères** |
-| `Variable d'environnement DB_CONNECTION manquante.` | Pas de chaîne de connexion | Renseigner `ConnectionStrings:DefaultConnection` ou `DB_CONNECTION` (section 3.c) |
-| `Access denied for user 'root'@'localhost'` | Mauvais identifiants MySQL | Corriger `Uid`/`Pwd` dans la chaîne de connexion |
-| `Unknown database 'horeca_info'` | Schéma non créé | Exécuter `horeca_db.sql` (section 3.b) |
-| Le login renvoie 401 alors que le compte existe | Comptes de test non chargés | Exécuter `seed.sql` **après** `horeca_db.sql` |
-| `Address already in use` / port 7160, 5287 ou 4200 occupé | Une instance tourne déjà | Fermer l'autre process, ou changer le port (`launchSettings.json` pour l'API, `ng serve --port 4300` pour le front) |
-| Front : erreurs CORS / appels bloqués | Backend non lancé en `https`, ou mauvaise URL | Lancer l'API avec `--launch-profile https` (CORS autorise `http://localhost:4200`) |
-| `Your connection is not private` / certificat HTTPS dev | Certificat de dev non approuvé | `dotnet dev-certs https --trust` puis relancer |
-| `ng` introuvable | Angular CLI non installé globalement | `npm install -g @angular/cli@21` |
-
----
-
-## 8. Structure du projet
-
-### Backend — Clean Architecture (`Api` → `Core` ← `Infrastructure`)
-
-```
-backend/
-├── Api/                              # Couche présentation (dépend de Core + Infrastructure)
-│   ├── Program.cs                    # Composition root : DI, JWT, CORS, pipeline, mapping des routes
-│   ├── appsettings.json              # Config non sensible (pas de secrets)
-│   ├── EndPoints/                    # Minimal API — un fichier de routes par module
-│   │   ├── UtilisateurRoutes.cs  FideliteRoutes.cs  PersonnelRoutes.cs
-│   │   └── PlanningRoutes.cs  PadelRoutes.cs
-│   ├── Middleware/
-│   │   ├── GlobalExceptionHandlerMiddleware.cs   # Exceptions → codes HTTP + message FR
-│   │   └── ActiveUserMiddleware.cs               # Bloque les comptes soft-deleted
-│   ├── Models/                       # DTO de requête HTTP (CreerTerrainRequest, TarifRequest…)
-│   └── Services/JwtTokenService.cs   # Génération du token JWT
-│
-├── Core/                             # Logique métier pure — AUCUNE dépendance infra
-│   ├── Models/                       # Entités métier + requêtes (User, Reservation, Tarif…)
-│   ├── IGateways/                    # Interfaces de passerelle (IUserGateway…)
-│   ├── UseCases/  (+ Abstractions/)  # Logique applicative + validation
-│   ├── Exceptions/                   # Validation(400)/Conflict(409)/NotFound(404)/Forbidden(403)
-│   └── ServiceCollectionExtension.cs # AddCoreServices()
-│
-└── Infrastructure/                   # Accès données (dépend de Core uniquement)
-    ├── Models/                       # Modèles DB (mapping colonnes SQL)
-    ├── Repositories/  (+ Abstractions/)  # SQL brut via Dapper
-    ├── Gateways/                     # Mapping Infrastructure ↔ Core + BCrypt
-    ├── ServiceCollectionExtension.cs # AddInfrastructureServices()
-    ├── horeca_db.sql                 # Schéma MySQL + données de référence
-    └── seed.sql                      # Comptes de test (à exécuter après horeca_db.sql)
-```
-
-### Frontend — Angular 21 standalone (zoneless)
-
-```
-frontend/src/app/
-├── app.config.ts  app.routes.ts  nav.config.ts  roles.ts   # Shell, routes, navigation, rôles
-├── guards/                         # auth.guard.ts (token valide) · role.guard.ts (rôles)
-├── components/                     # header, navbar, side-menu, *-card (commerces + onglets padel)
-├── pages/                          # home, login, register, mon-compte, fidelite, padel,
-│                                   #   gestion-terrains, gestion-utilisateurs, …
-├── services/
-│   ├── api/                        # auth, users, utilisateur-admin, fidelite, padel (+ models/)
-│   ├── auth-state.service.ts       # État d'auth : getters qui décodent le JWT (pas de signals)
-│   ├── menu-state.service.ts       # Ouverture du menu latéral (signal)
-│   └── tab-state.service.ts        # Onglet actif (signal)
-└── shared/format.util.ts           # Helpers de formatage (formatHeure, formatDate)
-```
-
----
-
-## 9. État des modules
-
-| Module | État |
-|---|---|
-| Authentification & rôles (JWT, BCrypt, soft-delete) | ✅ Complet |
-| Fidélité (solde, transactions) | ✅ Complet |
-| Padel (terrains, tarifs, réservations) | ✅ Complet |
-| Planning / Personnel (disponibilités, horaires) | 🟡 **Partiel — backend uniquement** (use cases + routes présents ; pages `disponibilites-page`, `mon-horaire-page`, `creer-horaires-page` non branchées) |
-| Interface Odoo | ⛔ Non démarré (hors périmètre actuel) |
